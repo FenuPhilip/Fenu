@@ -69,3 +69,23 @@ class SiteStat(models.Model):
 
     def __str__(self):
         return f"Visits: {self.visits}"
+
+
+class Post(models.Model):
+
+    POST_TYPES = [
+        ("project", "Project"),
+        ("event", "Event"),
+    ]
+
+    post_type = models.CharField(max_length=10, choices=POST_TYPES)
+
+    caption = models.TextField(blank=True)
+
+    image = models.ImageField(upload_to="posts/", blank=True, null=True)
+    video = models.FileField(upload_to="posts/", blank=True, null=True)
+
+    external_url = models.URLField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_published = models.BooleanField(default=True)
