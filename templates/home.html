@@ -231,6 +231,22 @@ body[data-theme="light"] {
         }
 
         /* ---------- POST ---------- */
+
+        .social-embed {
+            margin-top: 10px;
+        }
+
+        .instagram-media {
+            max-width: 100% !important;
+        }
+
+        /* ensure embedded content fills container and has rounded corners */
+        .social-embed iframe,
+        .social-embed blockquote {
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
         .post {
             position: relative;
             background: var(--bg-card);
@@ -381,6 +397,7 @@ body[data-theme="light"] {
         {% if post.external_url %}
         <div class="social-embed">
 
+        <!-- Instagram -->
         {% if "instagram.com" in post.external_url %}
         <blockquote class="instagram-media">
         <a href="{{ post.external_url }}"></a>
@@ -388,15 +405,46 @@ body[data-theme="light"] {
         <script async src="//www.instagram.com/embed.js"></script>
         {% endif %}
 
-        {% if "facebook.com" in post.external_url %}
-        <iframe 
-        src="https://www.facebook.com/plugins/post.php?href={{ post.external_url }}"
-        width="100%" height="600" style="border:none;overflow:hidden">
+        <!-- YouTube -->
+        {% if "youtube.com" in post.external_url or "youtu.be" in post.external_url %}
+        <iframe width="100%" height="450"
+        src="https://www.youtube.com/embed/{{ post.external_url|cut:'https://www.youtube.com/watch?v=' }}">
         </iframe>
         {% endif %}
 
+        <!-- Twitter / X -->
+        {% if "twitter.com" in post.external_url or "x.com" in post.external_url %}
+        <blockquote class="twitter-tweet">
+        <a href="{{ post.external_url }}"></a>
+        </blockquote>
+        <script async src="https://platform.twitter.com/widgets.js"></script>
+        {% endif %}
+
+        <!-- Facebook -->
+        {% if "facebook.com" in post.external_url %}
+        <iframe
+        src="https://www.facebook.com/plugins/post.php?href={{ post.external_url }}"
+        width="100%" height="600">
+        </iframe>
+        {% endif %}
+
+        <!-- LinkedIn -->
         {% if "linkedin.com" in post.external_url %}
         <iframe src="{{ post.external_url }}" width="100%" height="600"></iframe>
+        {% endif %}
+
+        <!-- GitHub repo -->
+        {% if "github.com" in post.external_url %}
+        <a href="{{ post.external_url }}" target="_blank">
+        View GitHub Repository
+        </a>
+        {% endif %}
+
+        <!-- Medium article -->
+        {% if "medium.com" in post.external_url %}
+        <a href="{{ post.external_url }}" target="_blank">
+        Read Medium Article
+        </a>
         {% endif %}
 
         </div>
