@@ -3,376 +3,793 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>{{ profile.name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 
     <style>
-        /* ---------- THEME VARIABLES ---------- */
+        /* ============================================================
+           THEME VARIABLES
+        ============================================================ */
         :root {
-            --bg-main: #000;
-            --bg-card: #0f0f0f;
-            --bg-menu: #0e0e0e;
-            --text-main: #eaeaea;
-            --text-muted: #aaa;
-            --border-main: #222;
-            --accent: #1e90ff;
-            --accent-event: #ff4757;
+            --bg-main: #080810;
+            --bg-card: #0d0d1a;
+            --bg-glass: rgba(255,255,255,0.03);
+            --bg-menu: #0a0a16;
+            --text-main: #f0f0f8;
+            --text-muted: #7a7a9a;
+            --text-dim: #3a3a5a;
+            --border-main: rgba(255,255,255,0.07);
+            --border-glow: rgba(99,102,241,0.4);
+            --accent: #6366f1;
+            --accent2: #a855f7;
+            --accent-event: #f43f5e;
+            --accent-project: #6366f1;
+            --glow: 0 0 60px rgba(99,102,241,0.2);
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
         }
 
         body[data-theme="light"] {
-            --bg-main: #f3f4f6;
+            --bg-main: #f8f8fc;
             --bg-card: #ffffff;
+            --bg-glass: rgba(0,0,0,0.02);
             --bg-menu: #ffffff;
-            --text-main: #111;
-            --text-muted: #555;
-            --border-main: #ddd;
-            --accent: #0057ff;
+            --text-main: #0f0f1a;
+            --text-muted: #6b6b8a;
+            --text-dim: #c0c0d0;
+            --border-main: rgba(0,0,0,0.08);
+            --border-glow: rgba(99,102,241,0.3);
+            --glow: 0 8px 32px rgba(99,102,241,0.12);
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background:
-                radial-gradient(800px at 80% -10%, rgba(255,255,255,0.04), transparent 40%),
-                radial-gradient(600px at 10% 20%, rgba(30,144,255,0.15), transparent 45%),
-                var(--bg-main);
+            font-family: var(--font-body);
+            background: var(--bg-main);
             color: var(--text-main);
-            transition: background 0.3s, color 0.3s;
+            transition: background 0.4s, color 0.4s;
+            overflow-x: hidden;
         }
+
+        /* ============================================================
+           ANIMATED BACKGROUND CANVAS
+        ============================================================ */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        body[data-theme="light"] #bg-canvas { opacity: 0.25; }
 
         .container {
-            max-width: 900px;
-            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+            max-width: 960px;
             margin: 0 auto;
-            padding: 40px 16px;
+            padding: 40px 24px 80px;
         }
 
-        body[data-theme="light"] .container {
-    max-width: 1200px;   /* wider */
-}
-
-body[data-theme="light"] {
-    background: linear-gradient(
-        180deg,
-        #f7f7f7 0%,
-        #ffffff 40%,
-        #f3f3f3 100%
-    );
-}
-
-        body[data-theme="light"] .post {
-    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-}
-
-
-
-        /* ---------- HERO ---------- */
-        .hero {
-            padding: 80px 0 60px;
-            animation: fadeUp 0.8s ease forwards;
-        }
-
-        .hero h1 {
-            font-size: 44px;
-            max-width: 720px;
-            margin: 0;
-        }
-
-        .hero p {
-            margin-top: 14px;
-            font-size: 18px;
-            color: var(--text-muted);
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ---------- TOGGLES ---------- */
-        .hamburger, .theme-toggle {
+        /* ============================================================
+           TOPBAR CONTROLS
+        ============================================================ */
+        .topbar {
             position: fixed;
-            top: 16px;
-            font-size: 20px;
-            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
-            padding: 6px 10px;
-            border-radius: 8px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-main);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 24px;
+            background: linear-gradient(to bottom, var(--bg-main) 0%, transparent 100%);
+            backdrop-filter: blur(0px);
+            transition: backdrop-filter 0.3s;
         }
 
-        .hamburger { right: 20px; }
-        .theme-toggle { right: 70px; }
+        .topbar.scrolled {
+            backdrop-filter: blur(16px);
+            background: rgba(8,8,16,0.8);
+        }
 
-        /* ---------- MENU ---------- */
+        body[data-theme="light"] .topbar.scrolled {
+            background: rgba(248,248,252,0.85);
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-main);
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            transition: all 0.25s;
+            backdrop-filter: blur(8px);
+        }
+
+        .ctrl-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 0 20px rgba(99,102,241,0.3);
+        }
+
+        /* ============================================================
+           SLIDE-IN MENU
+        ============================================================ */
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 998;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            backdrop-filter: blur(4px);
+        }
+
+        .menu-overlay.show { opacity: 1; pointer-events: all; }
+
         .menu {
             position: fixed;
             top: 0;
-            right: -100%;
-            width: 300px;
+            right: -380px;
+            width: 360px;
             height: 100%;
             background: var(--bg-menu);
-            padding: 20px;
-            transition: 0.3s;
+            border-left: 1px solid var(--border-main);
+            padding: 70px 28px 28px;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 999;
+            overflow-y: auto;
         }
 
         .menu.show { right: 0; }
 
+        .menu h3 {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         .menu input, .menu textarea {
             width: 100%;
-            margin-bottom: 10px;
-            background: var(--bg-main);
+            margin-bottom: 12px;
+            background: var(--bg-glass);
             border: 1px solid var(--border-main);
             color: var(--text-main);
-            padding: 8px;
-            border-radius: 6px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
         }
+
+        .menu input:focus, .menu textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+
+        .menu textarea { min-height: 100px; resize: vertical; }
 
         .menu button {
             width: 100%;
-            padding: 10px;
-            background: var(--accent);
+            padding: 13px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
             border: none;
             color: #fff;
-            border-radius: 6px;
+            border-radius: 12px;
             cursor: pointer;
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 15px;
+            transition: opacity 0.2s, transform 0.2s;
         }
 
-        /* ---------- PROFILE ---------- */
+        .menu button:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* ============================================================
+           HERO
+        ============================================================ */
+        .hero {
+            padding: 120px 0 70px;
+            opacity: 0;
+            animation: heroReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .hero-eyebrow::before {
+            content: '';
+            display: block;
+            width: 32px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(36px, 6vw, 68px);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            max-width: 800px;
+        }
+
+        .hero h1 .gradient-word {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            margin-top: 20px;
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 520px;
+            line-height: 1.65;
+            font-weight: 300;
+        }
+
+        @keyframes heroReveal {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============================================================
+           PROFILE
+        ============================================================ */
         .profile {
             display: flex;
             align-items: center;
-            gap: 24px;
-            padding-bottom: 40px;
-            border-bottom: 1px solid var(--border-main);
-            margin-bottom: 40px;
+            gap: 28px;
+            padding: 32px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-main);
+            border-radius: 24px;
+            margin-bottom: 50px;
+            opacity: 0;
+            animation: heroReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.5s forwards;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(99,102,241,0.08), transparent 60%);
+            pointer-events: none;
+        }
+
+        .profile-img-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .profile-img-wrap::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            z-index: -1;
         }
 
         .profile img {
-            width: 120px;
-            height: 120px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--border-main);
+            display: block;
+            border: 3px solid var(--bg-main);
         }
 
-        .role, .bio {
+        .profile h2 {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .role {
+            font-size: 13px;
+            color: var(--accent);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        .bio {
             color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.65;
+            margin-top: 8px;
         }
 
         .socials {
-            margin-top: 10px;
+            margin-top: 14px;
             display: flex;
-            gap: 14px;
+            gap: 10px;
+            flex-wrap: wrap;
         }
 
         .socials a {
-            font-size: 14px;
-            color: var(--accent);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--text-muted);
             text-decoration: none;
+            padding: 6px 14px;
+            border: 1px solid var(--border-main);
+            border-radius: 8px;
+            transition: all 0.25s;
         }
 
         .socials a:hover {
-            text-decoration: underline;
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(99,102,241,0.08);
         }
 
-        /* ---------- SKILLS ---------- */
+        /* ============================================================
+           SECTION LABEL
+        ============================================================ */
+        .section-label {
+            font-family: var(--font-display);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        /* ============================================================
+           SKILLS
+        ============================================================ */
         .skills {
-            margin-bottom: 50px;
+            margin-bottom: 56px;
+        }
+
+        .skills h2 {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 20px;
         }
 
         .skill-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
         }
 
         .skill-card {
-            padding: 14px;
-            background: var(--bg-card);
+            padding: 16px 18px;
+            background: var(--bg-glass);
             border: 1px solid var(--border-main);
-            border-radius: 12px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: default;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            animation: skillPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .skill-card:hover {
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(99,102,241,0.15);
+        }
+
+        @keyframes skillPop {
+            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .dots {
             display: flex;
             gap: 4px;
-            margin-top: 6px;
+            margin-top: 10px;
         }
 
         .dots span {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+            flex: 1;
+            height: 3px;
+            border-radius: 99px;
             background: var(--border-main);
+            transition: background 0.3s;
         }
 
         .dots span.on {
-            background: var(--accent);
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
         }
 
-        /* ---------- FILTERS ---------- */
+        /* ============================================================
+           FILTERS
+        ============================================================ */
         .filters {
             display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 8px;
+            margin-bottom: 30px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-main);
+            padding: 6px;
+            border-radius: 14px;
+            width: fit-content;
+            backdrop-filter: blur(8px);
         }
 
         .filters button {
-            background: var(--bg-card);
-            border: 1px solid var(--border-main);
-            color: var(--text-main);
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        /* ---------- POST ---------- */
-
-        .social-embed {
-            margin-top: 10px;
-        }
-
-        .instagram-media {
-            max-width: 100% !important;
-        }
-
-        .youtube-container{
-            border-radius:12px;
-            overflow:hidden;
-        }
-
-        .youtube-container iframe{
-            border:none;
-        }
-
-        /* ensure embedded content fills container and has rounded corners */
-        .social-embed iframe,
-        .social-embed blockquote {
-            width: 100%;
-            margin-top: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 20px;
             border-radius: 10px;
-        }
-
-        .linkedin-preview {
-            background: #111;
-            border: 1px solid #222;
-            padding: 20px;
-            border-radius: 12px;
-        }
-
-        .preview-header {
-            font-size: 14px;
+            cursor: pointer;
+            font-family: var(--font-display);
             font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-main);
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            transition: all 0.25s;
         }
 
-        .linkedin-preview p {
-            margin: 0 0 15px 0;
-            color: var(--text-main);
+        .filters button:hover { color: var(--text-main); }
+
+        .filters button.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(99,102,241,0.4);
         }
 
-        .linkedin-btn {
-            display: inline-block;
-            margin-top: 12px;
-            padding: 8px 14px;
-            background: #0A66C2;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background 0.25s ease;
-        }
-
-        .linkedin-btn:hover {
-            background: #095196;
-        }
+        /* ============================================================
+           POSTS
+        ============================================================ */
         .post {
             position: relative;
-            background: var(--bg-card);
+            background: var(--bg-glass);
             border: 1px solid var(--border-main);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 32px;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            border-radius: 20px;
+            padding: 0;
+            margin-bottom: 28px;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.35s;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            animation: postSlide 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes postSlide {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .post:hover {
             transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+            box-shadow: 0 24px 60px rgba(0,0,0,0.4), 0 0 0 1px var(--border-glow);
+            border-color: rgba(99,102,241,0.3);
+        }
+
+        body[data-theme="light"] .post:hover {
+            box-shadow: 0 16px 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(99,102,241,0.25);
+        }
+
+        .post-inner {
+            padding: 20px;
         }
 
         .badge {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            padding: 4px 10px;
-            font-size: 11px;
-            border-radius: 6px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            font-size: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             color: #fff;
+            margin-bottom: 14px;
         }
 
-        .badge.project { background: var(--accent); }
-        .badge.event { background: var(--accent-event); }
+        .badge::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.7);
+        }
 
-        .post img, .post video {
+        .badge.project {
+            background: linear-gradient(135deg, var(--accent-project), var(--accent2));
+        }
+
+        .badge.event {
+            background: linear-gradient(135deg, var(--accent-event), #ff6b35);
+        }
+
+        .post-media {
             width: 100%;
-            max-height: 420px;
-            object-fit: contain;
-            border-radius: 12px;
-            background: #000;
-            margin-bottom: 12px;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        .post:hover .post-media {
+            transform: scale(1.02);
+        }
+
+        .post-media-wrap {
+            overflow: hidden;
+            border-radius: 14px;
+            margin-bottom: 16px;
+        }
+
+        .post video {
+            width: 100%;
+            border-radius: 14px;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .post-caption {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           SOCIAL EMBEDS
+        ============================================================ */
+        .social-embed {
+            margin-bottom: 16px;
+        }
+
+        .instagram-media {
+            max-width: 100% !important;
+            border-radius: 14px !important;
+        }
+
+        .youtube-container {
+            border-radius: 14px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .youtube-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        .social-embed iframe,
+        .social-embed blockquote {
+            width: 100%;
+            margin: 0;
+            border-radius: 14px;
+        }
+
+        /* LinkedIn card */
+        .linkedin-preview {
+            background: linear-gradient(135deg, rgba(10,102,194,0.12), rgba(10,102,194,0.05));
+            border: 1px solid rgba(10,102,194,0.25);
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .preview-header {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #0A66C2;
+            font-family: var(--font-display);
+        }
+
+        .linkedin-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 18px;
+            background: #0A66C2;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.25s;
+        }
+
+        .linkedin-btn:hover {
+            background: #095196;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(10,102,194,0.4);
+        }
+
+        /* GitHub/Medium links */
+        .ext-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            padding: 10px 18px;
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 10px;
+            transition: all 0.25s;
+            background: rgba(99,102,241,0.06);
+        }
+
+        .ext-link:hover {
+            background: rgba(99,102,241,0.14);
+            border-color: var(--accent);
+            transform: translateX(3px);
+        }
+
+        /* ============================================================
+           FOOTER
+        ============================================================ */
         footer {
             text-align: center;
             font-size: 13px;
             color: var(--text-muted);
-            padding: 40px 0 10px;
+            padding: 50px 0 20px;
+            border-top: 1px solid var(--border-main);
+            margin-top: 20px;
+        }
+
+        footer strong {
+            color: var(--text-main);
+            font-family: var(--font-display);
         }
 
         .visits {
-            margin-top: 6px;
+            margin-top: 8px;
             font-size: 12px;
-            color: var(--text-muted);
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
         }
 
-        @media (max-width: 600px) {
+        /* ============================================================
+           SCROLL REVEAL
+        ============================================================ */
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+                        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ============================================================
+           RESPONSIVE
+        ============================================================ */
+        @media (max-width: 640px) {
             .profile {
                 flex-direction: column;
                 text-align: center;
             }
-            .hero h1 {
-                font-size: 32px;
-            }
-            .socials {
-                justify-content: center;
-            }
+
+            .socials { justify-content: center; }
+
+            .hero { padding: 100px 0 50px; }
+
+            .filters { width: 100%; justify-content: center; }
+
+            .menu { width: 100%; right: -100%; }
+
+            .post-media { aspect-ratio: 4/3; }
         }
+
+        /* ============================================================
+           CURSOR GLOW (desktop only)
+        ============================================================ */
+        .cursor-glow {
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+        }
+
+        body[data-theme="light"] .cursor-glow { opacity: 0; }
+
+        /* ============================================================
+           STAGGER DELAYS
+        ============================================================ */
+        .skill-card:nth-child(1)  { animation-delay: 0.05s; }
+        .skill-card:nth-child(2)  { animation-delay: 0.10s; }
+        .skill-card:nth-child(3)  { animation-delay: 0.15s; }
+        .skill-card:nth-child(4)  { animation-delay: 0.20s; }
+        .skill-card:nth-child(5)  { animation-delay: 0.25s; }
+        .skill-card:nth-child(6)  { animation-delay: 0.30s; }
+        .skill-card:nth-child(7)  { animation-delay: 0.35s; }
+        .skill-card:nth-child(8)  { animation-delay: 0.40s; }
+        .skill-card:nth-child(9)  { animation-delay: 0.45s; }
+        .skill-card:nth-child(10) { animation-delay: 0.50s; }
+
+        .post:nth-child(1) { animation-delay: 0.1s; }
+        .post:nth-child(2) { animation-delay: 0.2s; }
+        .post:nth-child(3) { animation-delay: 0.3s; }
+        .post:nth-child(4) { animation-delay: 0.4s; }
+        .post:nth-child(5) { animation-delay: 0.5s; }
     </style>
 </head>
 
 <body>
 
-<div class="theme-toggle" onclick="toggleTheme()">||</div>
-<div class="hamburger" onclick="toggleMenu()">☰</div>
+<!-- Cursor glow -->
+<div class="cursor-glow" id="cursorGlow"></div>
 
+<!-- Animated BG -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Top Controls -->
+<div class="topbar" id="topbar">
+    <button class="ctrl-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">◑</button>
+    <button class="ctrl-btn" onclick="toggleMenu()" title="Contact">✉</button>
+</div>
+
+<!-- Menu overlay -->
+<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+<!-- Slide-in Contact Menu -->
 <div class="menu" id="menu">
-    <h3>Contact</h3>
+    <h3>Say Hello.</h3>
     <form method="post">
         {% csrf_token %}
-        <input name="name" placeholder="Name" required>
-        <input name="email" placeholder="Email" required>
-        <input name="phone" placeholder="Phone">
-        <textarea name="message" placeholder="Message"></textarea>
-        <button type="submit">Send</button>
+        <input name="name" placeholder="Your name" required>
+        <input name="email" placeholder="Email address" required>
+        <input name="phone" placeholder="Phone (optional)">
+        <textarea name="message" placeholder="What's on your mind?"></textarea>
+        <button type="submit">Send Message →</button>
     </form>
 </div>
 
@@ -380,6 +797,7 @@ body[data-theme="light"] {
 
     <!-- HERO -->
     <section class="hero">
+        <div class="hero-eyebrow">Portfolio</div>
         <h1>{{ profile.hero_title }}</h1>
         <p>{{ profile.hero_subtitle }}</p>
     </section>
@@ -387,24 +805,26 @@ body[data-theme="light"] {
     <!-- PROFILE -->
     <div class="profile">
         {% if profile.profile_image %}
-            <img src="{{ profile.profile_image.url }}">
+        <div class="profile-img-wrap">
+            <img src="{{ profile.profile_image.url }}" alt="{{ profile.name }}">
+        </div>
         {% endif %}
         <div>
             <h2>{{ profile.name }}</h2>
             <div class="role">{{ profile.role }}</div>
             <div class="bio">{{ profile.bio }}</div>
-
             <div class="socials">
-                {% if profile.github %}<a href="{{ profile.github }}" target="_blank">GitHub</a>{% endif %}
-                {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank">LinkedIn</a>{% endif %}
-                {% if profile.instagram %}<a href="{{ profile.instagram }}" target="_blank">Instagram</a>{% endif %}
+                {% if profile.github %}<a href="{{ profile.github }}" target="_blank">GitHub ↗</a>{% endif %}
+                {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank">LinkedIn ↗</a>{% endif %}
+                {% if profile.instagram %}<a href="{{ profile.instagram }}" target="_blank">Instagram ↗</a>{% endif %}
             </div>
         </div>
     </div>
 
     <!-- SKILLS -->
     {% if skills %}
-    <section class="skills">
+    <section class="skills reveal">
+        <div class="section-label">Expertise</div>
         <h2>Skills</h2>
         <div class="skill-grid">
             {% for skill in skills %}
@@ -422,142 +842,226 @@ body[data-theme="light"] {
     {% endif %}
 
     <!-- FILTERS -->
-    <div class="filters">
-        <button onclick="filterPosts('all')">ALL</button>
-        <button onclick="filterPosts('project')">PROJECTS</button>
-        <button onclick="filterPosts('event')">EVENTS</button>
+    <div class="filters" id="filterBar">
+        <button class="active" onclick="filterPosts('all', this)">All</button>
+        <button onclick="filterPosts('project', this)">Projects</button>
+        <button onclick="filterPosts('event', this)">Events</button>
     </div>
 
     <!-- FEED -->
     {% for post in posts %}
     <div class="post" data-type="{{ post.post_type }}">
-        <div class="badge {{ post.post_type }}">{{ post.post_type|upper }}</div>
+        <div class="post-inner">
 
-        {% if post.image %}
-            <img src="{{ post.image.url }}">
-        {% endif %}
-        {% if post.video %}
-            <video controls><source src="{{ post.video.url }}"></video>
-        {% endif %}
+            <div class="badge {{ post.post_type }}">{{ post.post_type|upper }}</div>
 
-        {% if post.external_url %}
-        <div class="social-embed">
-
-        <!-- Instagram -->
-        {% if "instagram.com" in post.external_url %}
-        <blockquote class="instagram-media">
-        <a href="{{ post.external_url }}"></a>
-        </blockquote>
-        <script async src="//www.instagram.com/embed.js"></script>
-        {% endif %}
-
-        <!-- YouTube -->
-        {% if "youtube.com" in post.external_url or "youtu.be" in post.external_url %}
-
-        <div class="youtube-container">
-        <iframe
-            width="100%"
-            height="450"
-            src="https://www.youtube.com/embed/{{ post.external_url|youtube_id }}"
-            frameborder="0"
-            allowfullscreen>
-        </iframe>
-        </div>
-
-        {% endif %}
-
-        <!-- Twitter / X -->
-        {% if "twitter.com" in post.external_url or "x.com" in post.external_url %}
-        <blockquote class="twitter-tweet">
-        <a href="{{ post.external_url }}"></a>
-        </blockquote>
-        <script async src="https://platform.twitter.com/widgets.js"></script>
-        {% endif %}
-
-        <!-- Facebook -->
-        {% if "facebook.com" in post.external_url %}
-        <iframe
-        src="https://www.facebook.com/plugins/post.php?href={{ post.external_url }}"
-        width="100%" height="600">
-        </iframe>
-        {% endif %}
-
-        <!-- LinkedIn -->
-        {% if "linkedin.com" in post.external_url %}
-
-        <div class="linkedin-preview">
-            <div class="preview-header">
-                🔗 LinkedIn Post
+            {% if post.image %}
+            <div class="post-media-wrap">
+                <img class="post-media" src="{{ post.image.url }}" alt="Post image">
             </div>
+            {% endif %}
 
+            {% if post.video %}
+            <video controls><source src="{{ post.video.url }}"></video>
+            {% endif %}
 
-            <a href="{{ post.external_url }}" target="_blank" class="linkedin-btn">
-                View on LinkedIn →
-            </a>
+            {% if post.external_url %}
+            <div class="social-embed">
+
+                {% if "instagram.com" in post.external_url %}
+                <blockquote class="instagram-media">
+                    <a href="{{ post.external_url }}"></a>
+                </blockquote>
+                <script async src="//www.instagram.com/embed.js"></script>
+                {% endif %}
+
+                {% if "youtube.com" in post.external_url or "youtu.be" in post.external_url %}
+                <div class="youtube-container">
+                    <iframe
+                        src="https://www.youtube.com/embed/{{ post.external_url|youtube_id }}"
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                {% endif %}
+
+                {% if "twitter.com" in post.external_url or "x.com" in post.external_url %}
+                <blockquote class="twitter-tweet">
+                    <a href="{{ post.external_url }}"></a>
+                </blockquote>
+                <script async src="https://platform.twitter.com/widgets.js"></script>
+                {% endif %}
+
+                {% if "facebook.com" in post.external_url %}
+                <iframe src="https://www.facebook.com/plugins/post.php?href={{ post.external_url }}"
+                    width="100%" height="600"></iframe>
+                {% endif %}
+
+                {% if "linkedin.com" in post.external_url %}
+                <div class="linkedin-preview">
+                    <div class="preview-header">🔗 LinkedIn Post</div>
+                    <a href="{{ post.external_url }}" target="_blank" class="linkedin-btn">
+                        View on LinkedIn →
+                    </a>
+                </div>
+                {% endif %}
+
+                {% if "github.com" in post.external_url %}
+                <a href="{{ post.external_url }}" target="_blank" class="ext-link">
+                    ⬡ View GitHub Repository →
+                </a>
+                {% endif %}
+
+                {% if "medium.com" in post.external_url %}
+                <a href="{{ post.external_url }}" target="_blank" class="ext-link">
+                    ✦ Read on Medium →
+                </a>
+                {% endif %}
+
+            </div>
+            {% endif %}
+
+            <div class="post-caption">{{ post.caption }}</div>
         </div>
-
-        {% endif %}
-
-        <!-- GitHub repo -->
-        {% if "github.com" in post.external_url %}
-        <a href="{{ post.external_url }}" target="_blank">
-        View GitHub Repository
-        </a>
-        {% endif %}
-
-        <!-- Medium article -->
-        {% if "medium.com" in post.external_url %}
-        <a href="{{ post.external_url }}" target="_blank">
-        Read Medium Article
-        </a>
-        {% endif %}
-
-        </div>
-
-        {% endif %}
-
-        <div>{{ post.caption }}</div>
     </div>
     {% endfor %}
 
     <footer>
         Built & engineered by <strong>{{ profile.name }}</strong>
-        <div class="visits"> {{ visits }} : )</div>
+        <div class="visits">{{ visits }} visitors : )</div>
     </footer>
 
 </div>
 
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
 <script>
+    /* ---------- Menu ---------- */
     function toggleMenu() {
         document.getElementById("menu").classList.toggle("show");
+        document.getElementById("menuOverlay").classList.toggle("show");
     }
 
-    function filterPosts(type) {
+    /* ---------- Filter ---------- */
+    function filterPosts(type, btn) {
         document.querySelectorAll(".post").forEach(p => {
-            p.style.display =
-                (type === "all" || p.dataset.type === type) ? "block" : "none";
+            const match = type === "all" || p.dataset.type === type;
+            p.style.display = match ? "block" : "none";
+            if (match) {
+                p.style.animation = "none";
+                p.offsetHeight; // reflow
+                p.style.animation = "postSlide 0.5s cubic-bezier(0.22,1,0.36,1) forwards";
+            }
         });
+        document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+        if (btn) btn.classList.add("active");
     }
 
+    /* ---------- Theme ---------- */
     function toggleTheme() {
         const body = document.body;
-        const toggle = document.querySelector(".theme-toggle");
-
+        const btn = document.getElementById("themeBtn");
         if (body.getAttribute("data-theme") === "light") {
             body.removeAttribute("data-theme");
             localStorage.setItem("theme", "dark");
-            toggle.innerText = "||";
+            btn.textContent = "◑";
         } else {
             body.setAttribute("data-theme", "light");
             localStorage.setItem("theme", "light");
-            toggle.innerText = "O";
+            btn.textContent = "●";
         }
     }
 
     if (localStorage.getItem("theme") === "light") {
         document.body.setAttribute("data-theme", "light");
-        document.querySelector(".theme-toggle").innerText = "O";
+        document.getElementById("themeBtn").textContent = "●";
     }
+
+    /* ---------- Topbar scroll effect ---------- */
+    window.addEventListener("scroll", () => {
+        document.getElementById("topbar").classList.toggle("scrolled", window.scrollY > 20);
+    });
+
+    /* ---------- Cursor glow ---------- */
+    const glow = document.getElementById("cursorGlow");
+    document.addEventListener("mousemove", e => {
+        glow.style.left = e.clientX + "px";
+        glow.style.top  = e.clientY + "px";
+    });
+
+    /* ---------- Scroll reveal ---------- */
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add("visible");
+                revealObserver.unobserve(e.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll(".reveal").forEach(el => revealObserver.observe(el));
+
+    /* ---------- Animated BG canvas ---------- */
+    (function() {
+        const canvas = document.getElementById("bg-canvas");
+        const ctx = canvas.getContext("2d");
+        let W, H, particles = [];
+
+        function resize() {
+            W = canvas.width  = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+
+        function makeParticle() {
+            return {
+                x: Math.random() * W,
+                y: Math.random() * H,
+                r: Math.random() * 1.2 + 0.3,
+                dx: (Math.random() - 0.5) * 0.25,
+                dy: (Math.random() - 0.5) * 0.25,
+                o: Math.random() * 0.5 + 0.1
+            };
+        }
+
+        resize();
+        for (let i = 0; i < 90; i++) particles.push(makeParticle());
+        window.addEventListener("resize", resize);
+
+        function draw() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(99,102,241,${p.o})`;
+                ctx.fill();
+                p.x += p.dx;
+                p.y += p.dy;
+                if (p.x < 0 || p.x > W) p.dx *= -1;
+                if (p.y < 0 || p.y > H) p.dy *= -1;
+            });
+
+            // Draw soft connecting lines between close particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 110) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(99,102,241,${0.08 * (1 - dist/110)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    })();
 </script>
 
 </body>
