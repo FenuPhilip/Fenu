@@ -1059,17 +1059,17 @@
         if (body.getAttribute('data-theme') === 'light') {
             body.removeAttribute('data-theme');
             localStorage.setItem('theme', 'dark');
-            txt.textContent = 'DARK';
+            txt.textContent = 'O';
         } else {
             body.setAttribute('data-theme', 'light');
             localStorage.setItem('theme', 'light');
-            txt.textContent = 'LIGHT';
+            txt.textContent = '||';
         }
     }
 
     if (localStorage.getItem('theme') === 'light') {
         document.body.setAttribute('data-theme', 'light');
-        document.getElementById('themeTxt').textContent = 'LIGHT';
+        document.getElementById('themeTxt').textContent = '||';
     }
 </script>
 
