@@ -9,3 +9,12 @@ def youtube_id(url):
     if "youtu.be/" in url:
         return url.split("youtu.be/")[1].split("?")[0]
     return ""
+
+
+@register.filter
+def safe_url(field_file):
+    """Return image/file URL safely; returns '' if storage is misconfigured."""
+    try:
+        return field_file.url
+    except Exception:
+        return ""
