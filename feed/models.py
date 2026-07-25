@@ -81,3 +81,16 @@ class SiteStat(models.Model):
 
     def __str__(self):
         return f"Visits: {self.visits}"
+
+
+class SiteSettings(models.Model):
+    is_maintenance_mode = models.BooleanField(
+        default=False,
+        help_text="Turn on to display the maintenance page and block access to the site."
+    )
+
+    class Meta:
+        verbose_name_plural = "Site Settings"
+
+    def __str__(self):
+        return "Global Site Settings"

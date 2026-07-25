@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Post, Contact, Skill
+from .models import Profile, Post, Contact, Skill, SiteSettings
 from .models import SiteStat
 
 
@@ -28,3 +28,7 @@ class ContactAdmin(admin.ModelAdmin):
 class SkillAdmin(admin.ModelAdmin):
     list_display = ("name", "level", "category")
 
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    list_display = ("is_maintenance_mode",)
