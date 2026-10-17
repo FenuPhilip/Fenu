@@ -318,7 +318,7 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
         <h2>Let's build something together.</h2>
         <p class="lead">Share a project idea, a collaboration, or just a hello. I'll get back to you.</p>
         <button type="button" class="email" onclick="copyEmail()" title="Copy email">
-          <span id="emailText">{{ profile.name|lower|cut:" " }}@portfolio.io</span>
+          <span id="emailText">{{ profile.email|default:email }}</span>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4v-1c0-1.1.9-2 2-2h7c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2h-1M10 6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h5c1.1 0 2-.9 2-2V6z"/></svg>
         </button>
         <div class="soc">

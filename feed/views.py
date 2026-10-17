@@ -43,11 +43,22 @@ def home(request):
     posts = Post.objects.filter(is_published=True).order_by("-created_at")
     skills = Skill.objects.all()
 
+    # Real email resolution: Profile -> Superuser -> Fallback
+    email = getattr(profile, "email", None) if profile else None
+    if not email:
+        from django.contrib.auth import get_user_model
+        user = get_user_model().objects.filter(is_superuser=True).first() or get_user_model().objects.first()
+        if user and user.email:
+            email = user.email
+    if not email:
+        email = "fenuphilip19@gmail.com"
+
     response = render(request, "home.html", {
         "profile": profile,
         "posts": posts,
         "skills": skills,
         "visits": stat.visits,
+        "email": email,
     })
 
     # -------------------------
