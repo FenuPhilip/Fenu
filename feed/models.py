@@ -5,7 +5,6 @@ class Profile(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=150)
     bio = models.TextField()
-    email = models.EmailField(blank=True, default="fenuphilip19@gmail.com")
     profile_image = models.ImageField(upload_to="profile/", blank=True, null=True)
 
     instagram = models.URLField(blank=True)
