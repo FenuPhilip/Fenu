@@ -248,6 +248,13 @@ body::after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;op
 
 html.night{filter:invert(1) hue-rotate(180deg)}
 html.night img,html.night video,html.night canvas,html.night iframe,html.night .rn,html.night .tp{filter:invert(1) hue-rotate(180deg)}
+
+/* FP-ALIGN: the mask stays on .real, the photo is scaled and moved on the img inside it.
+   --fs  = zoom (bigger = bigger head)
+   --fx / --fy = the point the zoom grows from (put it on the face)
+   --fdy = how far the photo moves up (negative) or down (positive) after zooming */
+.real{overflow:hidden;--fx:58%;--fy:39%;--fs:2.05;--fdy:-26%}
+.real img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transform-origin:var(--fx) var(--fy);transform:translateY(var(--fdy)) scale(var(--fs))}
 </style>
 </head>
 <body>
@@ -281,7 +288,7 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
       </div>
       <figure class="portrait">
         <div class="pwrap">
-          <img class="real" src="{% static 'bluefenu.png' %}" alt="" aria-hidden="true">
+          <div class="real"><img src="{% static 'bluefenu.png' %}" alt="" aria-hidden="true"></div>
           <canvas id="pix" role="img" aria-label="Pixel portrait of {{ profile.name }}"></canvas>
         </div>
         <figcaption class="plinth">Poke the pixels</figcaption>
