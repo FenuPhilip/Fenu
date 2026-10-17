@@ -84,13 +84,32 @@ class SiteStat(models.Model):
 
 
 class SiteSettings(models.Model):
+    """Singleton model – only one row (id=1) should ever exist."""
+
     is_maintenance_mode = models.BooleanField(
         default=False,
-        help_text="Turn on to display the maintenance page and block access to the site."
+        verbose_name="Maintenance Mode",
+        help_text=(
+            "When ON, the public site shows the maintenance page. "
+            "The Django admin (/admin/) is never affected."
+        ),
     )
 
     class Meta:
+        verbose_name = "Site Settings"
         verbose_name_plural = "Site Settings"
 
     def __str__(self):
-        return "Global Site Settings"
+        status = "🔴 MAINTENANCE ON" if self.is_maintenance_mode else "🟢 Site Live"
+        return f"Global Site Settings — {status}"
+
+    def save(self, *args, **kwargs):
+        """Force singleton: always use pk=1."""
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        """Return the singleton instance, creating it if needed."""
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
