@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load video_filters %}
+{% load static %}
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -48,12 +49,27 @@ h1{margin:.4em 0 .3em;font:800 clamp(2.9rem,9.4vw,8.4rem)/.92 var(--display);fon
 .stats{display:flex;gap:36px;margin-top:28px}
 .stat b{display:block;font:800 clamp(2rem,4vw,2.8rem)/1 var(--display)}
 .stat span{font-style:italic;color:var(--muted)}
-.portrait{position:relative;width:min(100%,340px);margin-inline:auto 0}
-.portrait::before{content:"";position:absolute;inset:16px -16px -16px 16px;background:var(--sun);border:2px solid var(--ink);border-radius:999px 999px 28px 28px}
-.portrait img{position:relative;width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--paper);border:2px solid var(--ink);border-radius:999px 999px 28px 28px;animation:arch 1.2s var(--ease) .2s both}
-@keyframes arch{from{clip-path:inset(100% 0 0 0)}}
+.portrait{position:relative;width:min(100%,360px);aspect-ratio:4/5;margin:clamp(48px,7vw,84px) 0 0 auto}
+.stage{position:absolute;inset:0;overflow:hidden;background:var(--sun);border:2px solid var(--ink);border-radius:999px 999px 28px 28px}
+.stage::before{content:"";position:absolute;left:14%;right:14%;top:2%;aspect-ratio:1;background:var(--paper);border:2px solid var(--ink);border-radius:50%}
+.ghost{position:absolute;left:-6%;right:-6%;bottom:2px;height:116%;opacity:0;translate:0 0;background:radial-gradient(var(--cobalt) 36%,transparent 40%) 0 0/9px 9px;-webkit-mask:var(--cut) 50% 100%/contain no-repeat;mask:var(--cut) 50% 100%/contain no-repeat;transform:translate(calc(var(--px,0)*-14px),calc(var(--py,0)*-8px));transition:opacity .9s var(--ease),translate .9s var(--ease),transform .25s ease-out}
+.portrait.ready .ghost{opacity:1;translate:16px 12px}
+.cutbox{position:absolute;left:-6%;right:-6%;bottom:2px;height:116%;z-index:3;transform:translate(calc(var(--px,0)*14px),calc(var(--py,0)*8px));transition:transform .25s ease-out}
+.cut{width:100%;height:100%;max-width:none;object-fit:contain;object-position:50% 100%}
+.js .cut:not(.in){opacity:0}
+.pix{position:absolute;inset:0;width:100%;height:100%}
+.photo{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--paper);border:2px solid var(--ink);border-radius:999px 999px 28px 28px}
+.nocut .photo{display:block}
+.nocut .ghost,.nocut .cutbox{display:none}
+.ring{position:absolute;left:-30px;bottom:-30px;z-index:4;display:grid;place-items:center;width:116px;height:116px;background:var(--paper);border:2px solid var(--ink);border-radius:50%}
+.ring svg{position:absolute;inset:0;width:100%;height:100%;animation:spin 20s linear infinite}
+.ring:hover svg{animation-duration:5s}
+.ring text{font:600 10.5px var(--display);fill:var(--ink)}
+.ring img,.ring b{position:relative;display:grid;place-items:center;width:46%;height:46%;object-fit:cover;background:var(--sun);border:2px solid var(--ink);border-radius:50%;font:800 1.3rem/1 var(--display)}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media(min-width:900px){.hero-grid.has-img{grid-template-columns:1.6fr .8fr}}
-@media(max-width:899px){.portrait{order:-1;width:150px;margin:0}}
+@media(max-width:899px){.portrait{margin-inline:auto}}
+@media(max-width:560px){.ring{left:-8px;bottom:-26px;width:96px;height:96px}}
 
 /* skills band (marquee) */
 .band-wrap{overflow:hidden;padding:clamp(48px,8vw,96px) 0 clamp(32px,6vw,72px)}
@@ -148,8 +164,8 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
 .contact-form{padding:clamp(22px,4vw,36px);color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:32px 32px 32px 8px;box-shadow:10px 10px 0 var(--sun)}
 
 /* footer */
-.foot{padding:56px 0 120px;color:#fff;background:var(--ink)}
-.mark{font:800 clamp(3.2rem,15vw,13rem)/.85 var(--display);font-stretch:75%;letter-spacing:-.03em;color:rgba(255,255,255,.1);overflow-wrap:anywhere}
+.foot{position:relative;overflow:hidden;padding:56px 0 120px;color:#fff;background:var(--ink)}
+.mark{font:800 clamp(3.2rem,15vw,13rem)/.85 var(--display);font-stretch:75%;letter-spacing:-.03em;color:rgba(255,255,255,.16);overflow-wrap:anywhere}
 .foot-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 24px;margin-top:32px;color:rgba(255,255,255,.75)}
 .foot-row strong{color:#fff;font-weight:600}
 
@@ -179,6 +195,22 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
 .toast{position:fixed;left:50%;bottom:92px;z-index:70;padding:.7em 1.3em;font:600 .95rem var(--display);color:#fff;background:var(--ink);border-radius:99px;opacity:0;pointer-events:none;transform:translate(-50%,16px);transition:opacity .3s,transform .3s var(--ease)}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 
+/* bitmap textures + footer cameo */
+body::after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.07;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .07 0 0 0 0 .23 0 0 0 1.4 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hero::before{content:"";position:absolute;z-index:-1;top:0;right:0;width:min(70vw,760px);height:560px;pointer-events:none;background:radial-gradient(var(--cobalt) 1.6px,transparent 2.2px) 0 0/14px 14px;-webkit-mask:linear-gradient(210deg,#000,transparent 65%);mask:linear-gradient(210deg,#000,transparent 65%);opacity:.3}
+.post-media-wrap{position:relative;overflow:hidden;border-radius:20px 20px 20px 4px}
+.post-media{transition:filter 1.1s var(--ease),transform 1.1s var(--ease)}
+.js .post-media-wrap:not(.seen) .post-media{filter:grayscale(1) contrast(1.25);transform:scale(1.06)}
+.js .post-media-wrap::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(var(--cobalt) 35%,transparent 38%) 0 0/10px 10px;mix-blend-mode:multiply;opacity:.55;transition:opacity 1.1s var(--ease)}
+.js .post-media-wrap.seen::after{opacity:0}
+.mark{position:relative;z-index:0}
+.foot-row{position:relative;z-index:2}
+.peek{position:absolute;z-index:1;bottom:0;right:14%;width:clamp(150px,22vw,300px);height:clamp(220px,32vw,400px);object-fit:contain;object-position:50% 100%;transform-origin:50% 100%;transition:transform 1s cubic-bezier(.3,1.5,.5,1)}
+.peek:not([src]){visibility:hidden}
+.js .peek:not(.up){transform:translateY(102%)}
+.peek.up:hover{transform:translateY(-8px) rotate(-2.5deg)}
+@media(max-width:560px){.peek{right:4%}}
+
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -198,7 +230,7 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
 
 <main>
   <section class="hero" id="hero">
-    <div class="wrap hero-grid{% if profile.profile_image %} has-img{% endif %}">
+    <div class="wrap hero-grid has-img">
       <div class="hero-copy">
         <span class="role">{{ profile.role }}</span>
         <h1>{{ profile.hero_title }}</h1>
@@ -209,9 +241,15 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
           <div class="stat"><b data-count="{{ skills|length }}">{{ skills|length }}+</b><span>Skills</span></div>
         </div>
       </div>
-      {% if profile.profile_image %}
-      <figure class="portrait"><img src="{{ profile.profile_image|safe_url }}" alt="{{ profile.name }}"></figure>
-      {% endif %}
+      <figure class="portrait">
+        <div class="stage"><i class="ghost"></i></div>
+        {% if profile.profile_image %}<img class="photo" src="{{ profile.profile_image|safe_url }}" alt="{{ profile.name }}">{% endif %}
+        <div class="cutbox"><img class="cut" id="cutSrc" src="{% get_static_prefix %}bluefenu.png" alt="{{ profile.name }}" crossorigin="anonymous"></div>
+        <div class="ring" aria-hidden="true">
+          <svg viewBox="0 0 120 120"><defs><path id="circ" d="M60 60m-47 0a47 47 0 1 1 94 0a47 47 0 1 1-94 0"/></defs><text><textPath href="#circ" textLength="292" lengthAdjust="spacingAndGlyphs">{{ profile.role }} • {{ profile.role }} • </textPath></text></svg>
+          {% if profile.profile_image %}<img src="{{ profile.profile_image|safe_url }}" alt="">{% else %}<b>{{ profile.name|slice:":1" }}</b>{% endif %}
+        </div>
+      </figure>
     </div>
     {% if skills %}
     <div class="band-wrap" aria-hidden="true">
@@ -318,7 +356,7 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
         <h2>Let's build something together.</h2>
         <p class="lead">Share a project idea, a collaboration, or just a hello. I'll get back to you.</p>
         <button type="button" class="email" onclick="copyEmail()" title="Copy email">
-          <span id="emailText">{{ profile.email|default:email }}</span>
+          <span id="emailText">{{ profile.name|lower|cut:" " }}@portfolio.io</span>
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4v-1c0-1.1.9-2 2-2h7c1.1 0 2 .9 2 2v7c0 1.1-.9 2-2 2h-1M10 6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v7c0 1.1.9 2 2 2h5c1.1 0 2-.9 2-2V6z"/></svg>
         </button>
         <div class="soc">
@@ -340,6 +378,7 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
 </main>
 
 <footer class="foot">
+  <img class="peek" alt="" aria-hidden="true">
   <div class="wrap">
     <div class="mark" aria-hidden="true">{{ profile.name|upper }}</div>
     <div class="foot-row">
@@ -462,6 +501,88 @@ h2{font:800 clamp(2.3rem,6vw,4.8rem)/.98 var(--display);font-stretch:80%;letter-
       if(b){b.textContent='Sending…';setTimeout(function(){b.disabled=true},0)}
     });
   });
+
+  /* Cutout: auto-crop transparent margins, pixel-resolve entrance, halftone ghost, footer cameo */
+  var src=$('cutSrc'), stage=d.querySelector('.portrait'), peek=d.querySelector('.peek');
+  function reveal(u,o){
+    src.src=u; stage.style.setProperty('--cut','url("'+u+'")');
+    if(peek) peek.src=u;
+    stage.classList.add('ready');
+    if(!o||reduce){src.classList.add('in');return}
+    setTimeout(function(){pixelate(o)},450);
+  }
+  function pixelate(o){
+    var box=src.parentNode, r=Math.min(devicePixelRatio||1,2), cv=d.createElement('canvas');
+    cv.className='pix'; cv.width=box.clientWidth*r; cv.height=box.clientHeight*r; box.appendChild(cv);
+    var cx=cv.getContext('2d'), sc=Math.min(cv.width/o.width,cv.height/o.height), dw=o.width*sc, dh=o.height*sc,
+        dx=(cv.width-dw)/2, dy=cv.height-dh, t=d.createElement('canvas'), tx=t.getContext('2d'), steps=[56,36,22,13,7,3], n=0;
+    (function f(){
+      if(n>=steps.length){src.classList.add('in');cv.remove();return}
+      var b=steps[n++]*r; t.width=Math.max(2,Math.round(dw/b)); t.height=Math.max(2,Math.round(dh/b));
+      tx.drawImage(o,0,0,t.width,t.height);
+      cx.clearRect(0,0,cv.width,cv.height); cx.imageSmoothingEnabled=false;
+      cx.drawImage(t,0,0,t.width,t.height,dx,dy,dw,dh);
+      setTimeout(f,110);
+    })();
+  }
+  function go(){
+    setTimeout(function(){src.classList.add('in')},4500);
+    try{
+      var W=src.naturalWidth,H=src.naturalHeight,k=Math.min(1,360/Math.max(W,H)),w=Math.max(1,Math.round(W*k)),h=Math.max(1,Math.round(H*k));
+      var c=d.createElement('canvas'); c.width=w; c.height=h;
+      var x=c.getContext('2d'); x.drawImage(src,0,0,w,h);
+      var a=x.getImageData(0,0,w,h).data,x0=w,y0=h,x1=-1,y1=-1,i,j;
+      for(j=0;j<h;j++)for(i=0;i<w;i++)if(a[(j*w+i)*4+3]>24){if(i<x0)x0=i;if(i>x1)x1=i;if(j<y0)y0=j;if(j>y1)y1=j}
+      if(x1<0)throw 0;
+      var sx=Math.max(0,x0-2)/k, sy=Math.max(0,y0-2)/k, sw=Math.min(w,x1+3)/k-sx, sh=Math.min(h,y1+3)/k-sy, s=Math.min(1,1100/sh);
+      var o=d.createElement('canvas'); o.width=Math.round(sw*s); o.height=Math.round(sh*s);
+      o.getContext('2d').drawImage(src,sx,sy,sw,sh,0,0,o.width,o.height);
+      o.toBlob(function(b){b?reveal(URL.createObjectURL(b),o):reveal(src.src,null)});
+    }catch(e){reveal(src.src,null)}
+  }
+  function fail(){stage.classList.add('nocut')}
+  if(src.complete){src.naturalWidth?go():fail()}else{src.onload=go;src.onerror=fail}
+
+  /* Pointer parallax on the hero cutout */
+  if(!reduce&&matchMedia('(hover:hover)').matches){
+    var hero=d.querySelector('.hero'), raf=0;
+    hero.addEventListener('pointermove',function(e){
+      if(raf)return;
+      raf=requestAnimationFrame(function(){
+        raf=0; var r=hero.getBoundingClientRect();
+        stage.style.setProperty('--px',((e.clientX-r.left)/r.width-.5).toFixed(3));
+        stage.style.setProperty('--py',((e.clientY-r.top)/r.height-.5).toFixed(3));
+      });
+    });
+  }
+
+  /* Footer cameo rises when the footer is in view */
+  var foot=d.querySelector('.foot');
+  if(peek){
+    if('IntersectionObserver' in window&&!reduce) new IntersectionObserver(function(es){peek.classList.toggle('up',es[0].isIntersecting)},{threshold:.3}).observe(foot);
+    else peek.classList.add('up');
+  }
+
+  /* Post images "develop" from halftone greyscale */
+  var wraps=d.querySelectorAll('.post-media-wrap');
+  if('IntersectionObserver' in window&&!reduce){
+    var io2=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('seen');io2.unobserve(e.target)}})},{rootMargin:'0px 0px -8% 0px'});
+    wraps.forEach(function(w){io2.observe(w)});
+  } else wraps.forEach(function(w){w.classList.add('seen')});
+
+  /* Skills band speeds up, slows and reverses with scroll */
+  var tr=d.querySelector('.track'), an=tr&&tr.getAnimations&&tr.getAnimations()[0];
+  if(an&&!reduce){
+    var v=0, ly=scrollY, run=false;
+    (function(){
+      function tick(){
+        var y=scrollY; v+=(y-ly)*.05; ly=y; v*=.9;
+        an.playbackRate=Math.max(-5,Math.min(6,1+v));
+        if(Math.abs(v)>.01) requestAnimationFrame(tick); else{run=false;an.playbackRate=1;ly=scrollY}
+      }
+      addEventListener('scroll',function(){if(!run){run=true;requestAnimationFrame(tick)}},{passive:true});
+    })();
+  }
 
   /* Init */
   filterPosts('all',seg.querySelector('button'),true);
