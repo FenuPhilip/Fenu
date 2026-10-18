@@ -1039,13 +1039,13 @@ html.hm .tp{display:none}
         var nx=-a.ty,ny=a.tx;
         return '<path d="M'+n1(a.x-a.tx*h*.7+nx*h*.45)+' '+n1(a.y-a.ty*h*.7+ny*h*.45)+'L'+n1(a.x+a.tx*h*.3)+' '+n1(a.y+a.ty*h*.3)+'L'+n1(a.x-a.tx*h*.7-nx*h*.45)+' '+n1(a.y-a.ty*h*.7-ny*h*.45)+'" fill="none" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linecap="round" stroke-linejoin="round"/>';
     }
-    function crown(x,y,rot,sz,col){
+    function crown(x,y,rot,sz,col){return '';
         var cs=sz*.0046,sw=sz*.034/cs;
         return '<g transform="translate('+n1(x)+' '+n1(y)+') rotate('+rot+') scale('+cs.toFixed(4)+')" fill="none" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linejoin="round" stroke-linecap="round">'
             +'<path d="M0 62L-6 8L28 32L50 -4L72 32L106 8L100 62Z"/>'
             +'<circle cx="-6" cy="8" r="6" fill="'+col+'"/><circle cx="50" cy="-4" r="6" fill="'+col+'"/><circle cx="106" cy="8" r="6" fill="'+col+'"/></g>';
     }
-    function xm(x,y,s,col,sw){
+    function xm(x,y,s,col,sw){return '';
         return '<path transform="translate('+n1(x)+' '+n1(y)+') rotate(8)" d="M'+n1(-s)+' '+n1(-s)+'L'+n1(s)+' '+n1(s)+'M'+n1(s)+' '+n1(-s)+'L'+n1(-s)+' '+n1(s)+'" fill="none" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linecap="round"/>';
     }
 
