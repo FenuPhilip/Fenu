@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """
-update.py - graffiti redesign (v2) for templates/home.html
+update.py - graffiti redesign (v3, dry-brush street art) for templates/home.html
 
 What it does
-  1. Replaces the FP-GRAFFITI JavaScript block with a new design.
-     Placement, size, rotation and the role-splitting ("A | B | C") are unchanged.
-  2. Adds Sedgwick Ave Display (a real graffiti-marker Google Font) to the
-     fonts <link>. Kaushan Script stays as the fallback.
-  3. Adds a few lines of CSS (sparkle twinkle). Nothing else in the CSS changes.
-  4. Saves a backup next to the file: home.html.bak-graffiti-v1
+  1. Replaces the FP-GRAFFITI JavaScript block with the new design:
+     flat dry-brush lettering (cobalt / yellow / ink), crowns, arrows, X marks,
+     speed lines, drips and spray specks. Role text is still split on | , / etc.
+  2. Desktop: Developer top-left, Builder centre, last tag beside the pixel portrait.
+     Mobile: all tags sit BEHIND the pixel portrait, not behind the headline.
+  3. Removes the extra font and CSS that the previous version added.
+  4. Saves a backup next to the file: home.html.bak-graffiti-v1 (kept from the first run)
 
 Run from the project root (the folder that contains manage.py):
     python update.py
@@ -23,156 +24,195 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
-NEW_JS = r'''/* FP-GRAFFITI: the role text as clean, layered street-art tags behind the hero (v2) */
+NEW_JS = r'''/* FP-GRAFFITI: the role text as dry-brush street-art tags behind the hero (v3) */
 (function(){
     var w=d.querySelector('.wall');if(!w)return;
     var parts=(w.getAttribute('data-role')||'').split(/\s*[|\u2022\u00b7\/,]\s*/).map(function(t){return t.trim()}).filter(Boolean).slice(0,3);
     if(!parts.length)return;
 
-    var NS='http://www.w3.org/2000/svg',
-        FONT='Sedgwick Ave Display, Kaushan Script, cursive',
-        INK='#15133B',SUN='#FFC52E',COB='#2F3CFF',WHT='#FFFFFF';
+    var NS='http://www.w3.org/2000/svg',FONT='Kaushan Script, cursive',
+        INK='#15133B',SUN='#FFC52E',COB='#2F3CFF',COLS=[COB,SUN,INK];
 
-    /* one palette per tag: g = face gradient, x = 3D extrusion, s = underline swoosh,
-       k = big sparkle, m = small sparkle, b = halftone patch behind the tag */
-    var PAL=[
-        {g:['#7A84FF',COB,'#1B25C4'],x:SUN,s:SUN,k:SUN,m:WHT,b:SUN},
-        {g:['#FFE792',SUN,'#FF9E1B'],x:COB,s:COB,k:COB,m:WHT,b:COB},
-        {g:[WHT,'#F2F3FF','#BEC6FF'],x:COB,s:SUN,k:SUN,m:COB,b:COB}
-    ];
+    /* SX = how much the letters are squeezed (taller, chunkier); BIAS = which way the spray drifts */
+    var SX=[.76,.68,.64],BIAS=[-.16,0,.1];
+    /* desktop layout on a 1512px wide hero: [centre x, centre y, text width, rotation] */
+    var DESK=[[330,178,520,-11],[860,258,420,-15],[1325,262,340,-22]];
+    /* mobile layout: tags stacked behind the portrait. Heights are fractions of the portrait */
+    var MOBY=[.13,.43,.73],MOBW=[.8,.76,.78],MOBR=[-8,-7,-10],MOBX=[-4,6,-2];
 
     function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
     function n1(v){return String(Math.round(v*10)/10)}
 
-    /* natural width of the text at 100px, so letters are never stretched */
-    function measure(t){
-        var s=d.createElementNS(NS,'svg'),x=d.createElementNS(NS,'text'),n=0;
-        s.setAttribute('width','10');s.setAttribute('height','10');
-        s.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden';
-        x.setAttribute('font-family',FONT);x.setAttribute('font-size','100');x.textContent=t;
-        s.appendChild(x);d.body.appendChild(s);
-        try{n=x.getComputedTextLength()}catch(e){n=0}
-        d.body.removeChild(s);
-        return n||t.length*52;
+    /* hand-lettered feel: first letter bigger, small size jitter, baseline climbs a little */
+    function letters(t,r){
+        var a=[],i,ch;
+        for(i=0;i<t.length;i++){
+            ch=t.charAt(i);
+            a.push({c:ch===' '?'\u00a0':ch,k:i===0?1.24:(i===t.length-1?1.1:.93+r()*.14),dy:i?-(.016+(r()-.5)*.03):0});
+        }
+        return a;
+    }
+    function spans(L,S){
+        var o='',k;
+        for(k=0;k<L.length;k++)o+='<tspan font-size="'+n1(S*L[k].k)+'"'+(k?' dy="'+n1(L[k].dy*S)+'"':'')+'>'+esc(L[k].c)+'</tspan>';
+        return o;
+    }
+    /* natural width of the lettering at 100px and where its vertical middle sits */
+    function measure(L){
+        var h=d.createElement('div'),bb,res={w:L.length*48,cy:-28};
+        h.style.cssText='position:absolute;left:-9999px;top:0;visibility:hidden';
+        h.innerHTML='<svg width="10" height="10"><text x="0" y="0" font-family="'+FONT+'" font-size="100">'+spans(L,100)+'</text></svg>';
+        d.body.appendChild(h);
+        try{bb=h.querySelector('text').getBBox();if(bb.width>0){res.w=bb.width;res.cy=bb.y+bb.height/2}}catch(e){}
+        d.body.removeChild(h);
+        return res;
     }
 
-    /* four-point sparkle, outlined */
-    function star(x,y,s,fill,cls){
-        return '<g transform="translate('+n1(x)+' '+n1(y)+') scale('+n1(s)+')"><path class="sp '+cls+'" d="M0-1Q.14-.14 1 0Q.14.14 0 1Q-.14.14-1 0Q-.14-.14 0-1Z" fill="'+fill+'" stroke="'+INK+'" stroke-width="2.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></g>';
+    /* tapered brush stroke from (x1,y1) to (x2,y2); bend curves it, th is its thickness in the middle */
+    function tap(x1,y1,x2,y2,bend,th){
+        var dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy)||1,nx=-dy/l,ny=dx/l,
+            cx=(x1+x2)/2+nx*bend,cy=(y1+y2)/2+ny*bend,
+            ex=x2-cx,ey=y2-cy,el=Math.sqrt(ex*ex+ey*ey)||1;
+        return {d:'M'+n1(x1)+' '+n1(y1)+'Q'+n1(cx+nx*th)+' '+n1(cy+ny*th)+' '+n1(x2)+' '+n1(y2)+'Q'+n1(cx-nx*th)+' '+n1(cy-ny*th)+' '+n1(x1)+' '+n1(y1)+'Z',x:x2,y:y2,tx:ex/el,ty:ey/el};
+    }
+    function headS(a,h,col){
+        var nx=-a.ty,ny=a.tx;
+        return '<path d="M'+n1(a.x+a.tx*h*.6)+' '+n1(a.y+a.ty*h*.6)+'L'+n1(a.x-a.tx*h*.4+nx*h*.5)+' '+n1(a.y-a.ty*h*.4+ny*h*.5)+'L'+n1(a.x-a.tx*h*.4-nx*h*.5)+' '+n1(a.y-a.ty*h*.4-ny*h*.5)+'Z" fill="'+col+'" stroke="'+col+'" stroke-width="'+n1(h*.08)+'" stroke-linejoin="round"/>';
+    }
+    function headO(a,h,col,sw){
+        var nx=-a.ty,ny=a.tx;
+        return '<path d="M'+n1(a.x-a.tx*h*.7+nx*h*.45)+' '+n1(a.y-a.ty*h*.7+ny*h*.45)+'L'+n1(a.x+a.tx*h*.3)+' '+n1(a.y+a.ty*h*.3)+'L'+n1(a.x-a.tx*h*.7-nx*h*.45)+' '+n1(a.y-a.ty*h*.7-ny*h*.45)+'" fill="none" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+    function crown(x,y,rot,sz,col){
+        var cs=sz*.0046,sw=sz*.034/cs;
+        return '<g transform="translate('+n1(x)+' '+n1(y)+') rotate('+rot+') scale('+cs.toFixed(4)+')" fill="none" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linejoin="round" stroke-linecap="round">'
+            +'<path d="M0 62L-6 8L28 32L50 -4L72 32L106 8L100 62Z"/>'
+            +'<circle cx="-6" cy="8" r="6" fill="'+col+'"/><circle cx="50" cy="-4" r="6" fill="'+col+'"/><circle cx="106" cy="8" r="6" fill="'+col+'"/></g>';
+    }
+    function xm(x,y,s,col,sw){
+        return '<path transform="translate('+n1(x)+' '+n1(y)+') rotate(8)" d="M'+n1(-s)+' '+n1(-s)+'L'+n1(s)+' '+n1(s)+'M'+n1(s)+' '+n1(-s)+'L'+n1(-s)+' '+n1(s)+'" fill="none" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linecap="round"/>';
     }
 
-    var lw=0;
+    /* dry-brush: wobbly edge, bristle streaks eating the rim, solid core */
+    function fBrush(id,sz,seed){
+        return '<filter id="'+id+'" x="-12%" y="-35%" width="124%" height="170%" color-interpolation-filters="sRGB">'
+            +'<feTurbulence type="fractalNoise" baseFrequency="'+(3.2/sz).toFixed(4)+'" numOctaves="3" seed="'+seed+'" result="wp"/>'
+            +'<feDisplacementMap in="SourceGraphic" in2="wp" scale="'+n1(Math.max(3,sz*.05))+'" xChannelSelector="R" yChannelSelector="G" result="rg"/>'
+            +'<feTurbulence type="fractalNoise" baseFrequency="'+(.9/sz).toFixed(4)+' '+(15/sz).toFixed(4)+'" numOctaves="2" seed="'+(seed+5)+'" result="st"/>'
+            +'<feColorMatrix in="st" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 10 0 0 0 -2.6" result="sm"/>'
+            +'<feComposite in="rg" in2="sm" operator="in" result="dry"/>'
+            +'<feMorphology in="rg" operator="erode" radius="'+n1(Math.max(1.2,sz*.019))+'" result="core"/>'
+            +'<feMerge><feMergeNode in="dry"/><feMergeNode in="core"/></feMerge></filter>';
+    }
+    /* light version for thin things (crowns, X marks, drips): just a rough edge */
+    function fRough(id,sz,seed){
+        return '<filter id="'+id+'" x="-12%" y="-35%" width="124%" height="170%" color-interpolation-filters="sRGB">'
+            +'<feTurbulence type="fractalNoise" baseFrequency="'+(4/sz).toFixed(4)+'" numOctaves="2" seed="'+seed+'" result="wp"/>'
+            +'<feDisplacementMap in="SourceGraphic" in2="wp" scale="'+n1(Math.max(2,sz*.03))+'" xChannelSelector="R" yChannelSelector="G"/></filter>';
+    }
+
+    var sig='',busy=0;
     function build(still){
-        var W=w.clientWidth,H=w.clientHeight,P=20,u=W<900?W/420:W/1600,r=rng(11),svg='',defs='';
+        var W=w.clientWidth,H=w.clientHeight,P=20,u=W/1512,svg='',defs='',
+            wr=w.getBoundingClientRect(),pe=d.querySelector('.pwrap'),pr=pe?pe.getBoundingClientRect():null,
+            hasP=!!(pr&&pr.width>20&&pr.height>20),mob=W<900,pt=0,pl=0,ph=0,pwid=0;
+        if(hasP){pt=pr.top-wr.top;pl=pr.left-wr.left;ph=pr.height;pwid=pr.width}
 
-        /* a barely-there wobble so edges feel hand-painted, not vector-perfect */
-        defs+='<filter id="fpEdge" x="-10%" y="-25%" width="120%" height="150%"><feTurbulence type="fractalNoise" baseFrequency=".022" numOctaves="2" seed="6" result="nz"/><feDisplacementMap in="SourceGraphic" in2="nz" scale="3.2" xChannelSelector="R" yChannelSelector="G"/></filter>';
-        defs+='<linearGradient id="fpHf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient>';
-        defs+='<radialGradient id="fpRf"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>';
-
-        /* same placement as before: [centre x, centre y, width, rotation] */
-        var L=W<900?[[210,95,360,-8],[215,190,300,-6],[210,285,340,-10]]:[[480,230,800,-9],[980,275,520,-8],[1330,335,560,-17]];
+        defs+='<radialGradient id="fpRf"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient>';
 
         parts.forEach(function(t,i){
-            var c=L[i],p=PAL[i%PAL.length],wd=c[2]*u,nat=measure(t)/100,
-                sz=Math.min(wd/nat,H*.3),tw=nat*sz,id='fpT'+i,
-                line=sz*.028,ow=sz*.1,n=Math.round(sz*.07)+2,stp=1.3,
-                hp=Math.max(6,sz*.075),
-                bx=n1(-tw*1.1),by=n1(-sz),bw=n1(tw*2.2),bh=n1(sz*2),
-                T='',k,x,y,len,dw,sx1,sx2,yb,mid,sw,fr,dr,sp,sd,sh;
+            var r=rng(100+i*17),L=letters(t,r),m=measure(L),col=COLS[i%3],
+                sx=mob?SX[i]*.92:SX[i],nat=m.w/100,wd,cx,cy,rot,cap,sz,tw,ty,sw,hp,
+                idB='fpB'+i,idR='fpR'+i,idO='fpO'+i,idP='fpP'+i,T='',O='',sp='',k,a,b,fr,nd,bx,by,bw,bh,dr,body;
 
-            /* ---- defs for this tag ---- */
-            defs+='<text id="'+id+'" x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="'+FONT+'" font-size="'+n1(sz)+'">'+esc(t)+'</text>';
-            defs+='<linearGradient id="'+id+'g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+p.g[0]+'"/><stop offset=".5" stop-color="'+p.g[1]+'"/><stop offset="1" stop-color="'+p.g[2]+'"/></linearGradient>';
-            defs+='<clipPath id="'+id+'c"><use href="#'+id+'"/></clipPath>';
-            defs+='<pattern id="'+id+'h" width="'+n1(hp)+'" height="'+n1(hp)+'" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="'+n1(hp/2)+'" cy="'+n1(hp/2)+'" r="'+n1(hp*.24)+'" fill="'+INK+'"/></pattern>';
-            defs+='<pattern id="'+id+'b" width="'+n1(hp*1.2)+'" height="'+n1(hp*1.2)+'" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><circle cx="'+n1(hp*.6)+'" cy="'+n1(hp*.6)+'" r="'+n1(hp*.26)+'" fill="'+p.b+'"/></pattern>';
-            defs+='<mask id="'+id+'m" maskUnits="userSpaceOnUse" x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'"><rect x="'+bx+'" y="'+n1(-sz*.12)+'" width="'+bw+'" height="'+n1(sz*.7)+'" fill="url(#fpHf)"/></mask>';
-            defs+='<mask id="'+id+'o" maskUnits="userSpaceOnUse" x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'"><ellipse cx="0" cy="'+n1(sz*.05)+'" rx="'+n1(tw*.58)+'" ry="'+n1(sz*.8)+'" fill="url(#fpRf)"/></mask>';
+            /* where this tag goes */
+            if(mob){
+                wd=W*MOBW[i];cx=W/2+MOBX[i];rot=MOBR[i];
+                cy=hasP?pt+ph*MOBY[i]:H*(.3+i*.12);cap=(hasP?ph:H*.4)*.2;
+            }else{
+                wd=DESK[i][2]*u;cx=DESK[i][0]*u;cy=DESK[i][1]*u;rot=DESK[i][3];cap=H*.3;
+                if(i===2&&hasP){cx=Math.min(pl+pwid/2+W*.12,W-wd*.6-14);cy=pt+ph*.1}
+            }
+            sz=Math.min(wd/(nat*sx),cap);tw=nat*sz*sx;ty=-m.cy*sz/100;sw=sz*.08;hp=Math.max(6,sz*.08);
+            bx=n1(-tw*1.1);by=n1(-sz*1.2);bw=n1(tw*2.2);bh=n1(sz*2.4);
 
-            /* ---- 1. underline swoosh: one tapered brush stroke ---- */
-            sx1=-tw*(i===1?.3:.48);sx2=tw*(i===1?.5:.46);yb=sz*.47;mid=(sx1+sx2)/2;
-            sw='M'+n1(sx1)+' '+n1(yb+sz*.05)+'Q'+n1(mid)+' '+n1(yb-sz*.1)+' '+n1(sx2)+' '+n1(yb-sz*.1)+'Q'+n1(mid)+' '+n1(yb+sz*.07)+' '+n1(sx1)+' '+n1(yb+sz*.05)+'Z';
-            T+='<path d="'+sw+'" transform="translate('+n1(sz*.03)+' '+n1(sz*.03)+')" fill="'+INK+'"/>';
-            T+='<path d="'+sw+'" fill="'+p.s+'" stroke="'+INK+'" stroke-width="'+n1(line)+'" stroke-linejoin="round"/>';
+            defs+=fBrush(idB,sz,3+i*7)+fRough(idR,sz,9+i*5);
+            defs+='<pattern id="'+idP+'" width="'+n1(hp)+'" height="'+n1(hp)+'" patternUnits="userSpaceOnUse" patternTransform="rotate(-20)"><circle cx="'+n1(hp/2)+'" cy="'+n1(hp/2)+'" r="'+n1(hp*.22)+'" fill="'+col+'"/></pattern>';
+            defs+='<mask id="'+idO+'" maskUnits="userSpaceOnUse" x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'"><ellipse cx="'+n1(BIAS[i]*tw)+'" cy="0" rx="'+n1(tw*.66)+'" ry="'+n1(sz*.8)+'" fill="url(#fpRf)"/></mask>';
 
-            /* ---- 2. 3D extrusion: ink silhouette first, then the coloured side on top of it ---- */
-            for(k=n;k>=0;k--)T+='<use href="#'+id+'" x="'+n1(k*stp)+'" y="'+n1(k*stp)+'" fill="'+INK+'" stroke="'+INK+'" stroke-width="'+n1(ow)+'" stroke-linejoin="round"/>';
-            for(k=n;k>=1;k--)T+='<use href="#'+id+'" x="'+n1(k*stp)+'" y="'+n1(k*stp)+'" fill="'+p.x+'" stroke="'+p.x+'" stroke-width="'+n1(ow-2*line)+'" stroke-linejoin="round"/>';
+            /* the word itself */
+            T+='<g transform="scale('+sx.toFixed(3)+' 1)"><text x="0" y="'+n1(ty)+'" text-anchor="middle" font-family="'+FONT+'" font-size="'+n1(sz)+'" fill="'+col+'" stroke="'+col+'" stroke-width="'+n1(sw)+'" stroke-linejoin="round" stroke-linecap="round">'+spans(L,sz)+'</text></g>';
 
-            /* ---- 3. ink outline of the front face ---- */
-            T+='<use href="#'+id+'" fill="'+INK+'" stroke="'+INK+'" stroke-width="'+n1(ow)+'" stroke-linejoin="round"/>';
-
-            /* ---- 4. a few tidy drips, tucked under the face ---- */
-            fr=tw>sz*3?[-.31,.07,.34]:[-.2,.26];
-            dr='';
-            fr.forEach(function(f,j){
-                x=(f+(r()-.5)*.05)*tw;y=sz*.1;len=sz*(.2+r()*.2);dw=sz*.065;
-                var cx=x+dw/2,col=p.g[1];
-                dr+='<g class="dr" style="animation-delay:'+(1.2+j*.2+i*.2).toFixed(2)+'s">'
-                  +'<rect x="'+n1(x)+'" y="'+n1(y)+'" width="'+n1(dw)+'" height="'+n1(len)+'" rx="'+n1(dw/2)+'" fill="'+INK+'" stroke="'+INK+'" stroke-width="'+n1(line*2)+'" stroke-linejoin="round"/>'
-                  +'<circle cx="'+n1(cx)+'" cy="'+n1(y+len)+'" r="'+n1(dw*.78)+'" fill="'+INK+'" stroke="'+INK+'" stroke-width="'+n1(line*2)+'"/>'
-                  +'<rect x="'+n1(x)+'" y="'+n1(y)+'" width="'+n1(dw)+'" height="'+n1(len)+'" rx="'+n1(dw/2)+'" fill="'+col+'"/>'
-                  +'<circle cx="'+n1(cx)+'" cy="'+n1(y+len)+'" r="'+n1(dw*.78)+'" fill="'+col+'"/></g>';
-            });
-            T+=dr;
-
-            /* ---- 5. front face: gradient fill ---- */
-            T+='<use href="#'+id+'" fill="url(#'+id+'g)"/>';
-
-            /* ---- 6. shading clipped to the letters: rim light, halftone, gloss ---- */
-            sh=sz*.5;
-            T+='<g clip-path="url(#'+id+'c)">'
-              +'<use href="#'+id+'" fill="none" stroke="'+WHT+'" stroke-width="'+n1(sz*.075)+'" stroke-linejoin="round" opacity=".9"/>'
-              +'<use href="#'+id+'" x="'+n1(sz*.022)+'" y="'+n1(sz*.024)+'" fill="url(#'+id+'g)"/>'
-              +'<g mask="url(#'+id+'m)"><rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="url(#'+id+'h)" opacity=".34"/></g>'
-              +'<path d="M'+n1(-tw*.2+sh)+' '+n1(-sz)+'L'+n1(-tw*.2+sh+tw*.06)+' '+n1(-sz)+'L'+n1(-tw*.2+tw*.06)+' '+n1(sz)+'L'+n1(-tw*.2)+' '+n1(sz)+'Z" fill="'+WHT+'" opacity=".2"/>'
-              +'<path d="M'+n1(tw*.02+sh)+' '+n1(-sz)+'L'+n1(tw*.02+sh+tw*.022)+' '+n1(-sz)+'L'+n1(tw*.02+tw*.022)+' '+n1(sz)+'L'+n1(tw*.02)+' '+n1(sz)+'Z" fill="'+WHT+'" opacity=".2"/>'
-              +'</g>';
-
-            /* ---- specks: a handful of spray dots, kept clear of the letters ---- */
-            sp='';
-            for(k=0;k<8;k++){
-                x=(r()-.5)*tw*1.3;y=(r()<.5?-1:1)*(.46+r()*.36)*sz;
-                sp+='<circle cx="'+n1(x)+'" cy="'+n1(y)+'" r="'+(.9+r()*1.9).toFixed(1)+'" fill="'+[INK,p.s,p.x][k%3]+'" opacity="'+(.55+r()*.35).toFixed(2)+'"/>';
+            /* ornaments, per tag */
+            if(i===0){
+                a=tap(-.16*tw,.62*sz,.26*tw,.5*sz,.07*sz,.11*sz);
+                T+='<path d="'+a.d+'" fill="'+col+'"/>'+headS(a,.26*sz,col);
+                b=tap(.66*tw,-.5*sz,.5*tw,.04*sz,-.05*sz,.022*sz);
+                O+='<path d="'+b.d+'" fill="'+col+'"/>'+headO(b,.15*sz,col,sz*.024);
+                O+=xm(.38*tw,.68*sz,.08*sz,col,sz*.034);
+                O+=crown(-.46*tw,-.96*sz,-14,sz,col);
+            }else if(i===1){
+                a=tap(-.36*tw,.64*sz,.4*tw,.42*sz,.1*sz,.12*sz);
+                T+='<path d="'+a.d+'" fill="'+col+'"/>';
+                b=tap(-.12*tw,.82*sz,.36*tw,.66*sz,.05*sz,.036*sz);
+                T+='<path d="'+b.d+'" fill="'+col+'"/>';
+                O+='<path d="'+tap(.46*tw,.46*sz,.66*tw,.38*sz,0,.02*sz).d+'" fill="'+col+'"/>';
+                O+=xm(-.6*tw,.12*sz,.09*sz,col,sz*.034)+xm(.16*tw,-1.04*sz,.08*sz,col,sz*.034)+xm(.52*tw,-.62*sz,.08*sz,col,sz*.034);
+                O+=crown(-.4*tw,-1.02*sz,-10,sz,col);
+            }else{
+                a=tap(-.12*tw,.74*sz,.5*tw,.42*sz,.2*sz,.1*sz);
+                T+='<path d="'+a.d+'" fill="'+col+'"/>'+headS(a,.28*sz,col);
+                for(k=0;k<3;k++)O+='<path d="'+tap(-.8*tw,(-.22+k*.17)*sz,-.6*tw,(-.28+k*.17)*sz,0,.024*sz).d+'" fill="'+col+'"/>';
+                O+=crown(-.42*tw,-1.0*sz,-12,sz,col);
             }
 
-            /* ---- sparkles on the side with room ---- */
-            sd=(c[0]*u+P+tw/2+sz*.4<W+40)?1:-1;
-            var stars=star(sd*(tw*.5+sz*.06),-sz*.42,sz*.2,p.k,'a')
-                     +star(sd*(tw*.5+sz*.22),-sz*.08,sz*.1,p.m,'b')
-                     +star(-sd*(tw*.5+sz*.02),sz*.4,sz*.09,p.k,'b');
+            /* a few drips */
+            nd=tw>sz*3.2?3:2;fr=nd===3?[-.36,.02,.3]:[-.2,.25];
+            fr.forEach(function(f,j){
+                var x=(f+(r()-.5)*.05)*tw,y0=sz*.2,len=sz*(.22+r()*.3),dw=sz*.032;
+                O+='<g class="dr" style="animation-delay:'+(1.2+j*.2+i*.2).toFixed(2)+'s"><path d="M'+n1(x)+' '+n1(y0)+'L'+n1(x)+' '+n1(y0+len)+'" fill="none" stroke="'+col+'" stroke-width="'+n1(dw)+'" stroke-linecap="round"/><circle cx="'+n1(x)+'" cy="'+n1(y0+len+dw)+'" r="'+n1(dw*1.15)+'" fill="'+col+'"/></g>';
+            });
 
-            var g='<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="url(#'+id+'b)" mask="url(#'+id+'o)" opacity=".5"/>'
-                 +'<g filter="url(#fpEdge)">'+T+'</g>'+sp+stars;
+            /* spray specks, thicker on the side the spray drifts to */
+            for(k=0;k<58;k++){
+                var ag=r()*6.2832,rd=Math.pow(r(),.7),px=Math.cos(ag)*rd*tw*.64+BIAS[i]*tw,py=Math.sin(ag)*rd*sz*.88,big=r()<.14;
+                sp+='<circle cx="'+n1(px)+'" cy="'+n1(py)+'" r="'+(big?1.8+r()*2.6:.6+r()*1.4).toFixed(1)+'" fill="'+col+'" opacity="'+(.3+r()*.6).toFixed(2)+'"/>';
+            }
 
-            svg+='<g class="wg" style="animation-delay:'+(i*.25).toFixed(2)+'s"><g transform="translate('+(c[0]*u+P).toFixed(0)+' '+(c[1]*u+P).toFixed(0)+') rotate('+c[3]+')">'+g+'</g></g>';
+            body='<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="url(#'+idP+')" mask="url(#'+idO+')" opacity=".3"/>'
+                +'<g filter="url(#'+idB+')">'+T+'</g><g filter="url(#'+idR+')">'+O+'</g>'+sp;
+
+            svg+='<g class="wg" style="animation-delay:'+(i*.25).toFixed(2)+'s"><g transform="translate('+(cx+P).toFixed(0)+' '+(cy+P).toFixed(0)+') rotate('+rot+')">'+body+'</g></g>';
         });
 
         w.classList.toggle('still',!!still);
         w.innerHTML='<svg viewBox="0 0 '+(W+40)+' '+(H+40)+'" preserveAspectRatio="none" aria-hidden="true"><defs>'+defs+'</defs>'+svg+'</svg>';
     }
 
-    function go(){lw=w.clientWidth;build(false)}
-    var ft=d.fonts&&d.fonts.load?Promise.all([d.fonts.load('120px "Sedgwick Ave Display"',parts.join('')),d.fonts.load('120px "Kaushan Script"')]):Promise.resolve();
+    /* rebuild only when the hero or the portrait actually moved */
+    function sigNow(){
+        var wr=w.getBoundingClientRect(),pe=d.querySelector('.pwrap'),pr=pe?pe.getBoundingClientRect():null;
+        return [w.clientWidth,w.clientHeight,pr?Math.round(pr.top-wr.top):0,pr?Math.round(pr.left-wr.left):0,pr?Math.round(pr.height):0].join();
+    }
+    function refresh(still){var s=sigNow();if(s===sig)return;sig=s;build(still)}
+    function go(){sig='';refresh(false)}
+
+    var ft=d.fonts&&d.fonts.load?d.fonts.load('120px "Kaushan Script"',parts.join('')):Promise.resolve();
     Promise.race([ft,new Promise(function(a){setTimeout(a,1800)})]).then(go,go);
     var rt;
-    addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(lw&&w.clientWidth!==lw){lw=w.clientWidth;build(true)}},250)});
+    function later(){clearTimeout(rt);rt=setTimeout(function(){refresh(true)},220)}
+    addEventListener('resize',later);
+    addEventListener('load',later);
+    if(window.ResizeObserver)new ResizeObserver(later).observe(w);
     if(!reduce)addEventListener('pointermove',function(e){
         w.style.setProperty('--wx',((e.clientX/innerWidth-.5)*2).toFixed(2));
         w.style.setProperty('--wy',((e.clientY/innerHeight-.5)*2).toFixed(2));
     },{passive:true});
 })();'''
 
-NEW_CSS = '''/* FP-GRAFFITI-V2 */
-.wall .sp{transform-box:fill-box;transform-origin:center;animation:twinkle 3s ease-in-out infinite}
-.wall .sp.b{animation-delay:-1.5s}
-@keyframes twinkle{50%{transform:scale(.55) rotate(25deg)}}
-/* /FP-GRAFFITI-V2 */
-'''
+NEW_CSS = ''  # v3 needs no extra CSS (the v2 block is removed below)
 
-OLD_FONT = "&family=Kaushan+Script&display=swap"
-NEW_FONT = "&family=Kaushan+Script&family=Sedgwick+Ave+Display&display=swap"
+EXTRA_FONT = "&family=Sedgwick+Ave+Display"   # added by v2, not needed any more
 
 
 def find_file():
@@ -205,17 +245,14 @@ def main():
 
     html = pat.sub(lambda m: NEW_JS, html, count=1)
 
-    # 2. font link
-    if "Sedgwick+Ave+Display" not in html:
-        if OLD_FONT in html:
-            html = html.replace(OLD_FONT, NEW_FONT, 1)
-        else:
-            print("Note: could not find the Google Fonts link. Add "
-                  "&family=Sedgwick+Ave+Display to it by hand (Kaushan Script will be used until then).")
+    # 2. drop the Sedgwick font that v2 added (v3 uses Kaushan Script, already loaded)
+    html = html.replace(EXTRA_FONT, "")
+    if "Kaushan+Script" not in html:
+        print("Note: Kaushan Script is missing from your Google Fonts link; add "
+              "&family=Kaushan+Script to it, otherwise a fallback font is used.")
 
-    # 3. CSS (replace any earlier v2 block, then add before </style>)
+    # 3. remove the CSS block that v2 added
     html = re.sub(r"/\* FP-GRAFFITI-V2 \*/.*?/\* /FP-GRAFFITI-V2 \*/\s*", "", html, flags=re.S)
-    html = html.replace("</style>", NEW_CSS + "</style>", 1)
 
     path.write_text(html, encoding="utf-8")
     print("Done. Updated:", path)
@@ -224,4 +261,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  
