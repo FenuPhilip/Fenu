@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Replaces the pixel portrait with one built from the NEW bluefenu.png and aligns
-the real photo to it exactly (so the hammer and hover reveal match).
-Run from the project root:   python update_portrait.py
-(or:  python update_portrait.py path/to/home.html)
-Make sure feed/static/bluefenu.png is the new 1008x2048 image.
+1) Removes the Visits / Skills counters from the hero (the footer V###.io stays).
+2) Replaces the role capsule with the role text as graffiti behind the hero.
+   The words still come from profile.role (split on | , / or a dot).
+Run from the project root:   python hero_graffiti.py
+(or:  python hero_graffiti.py path/to/home.html)
 """
 import re, sys, shutil, pathlib
 
@@ -12,23 +12,63 @@ p = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else 'templates/home.html')
 if not p.exists():
     sys.exit('Cannot find ' + str(p) + ' - run this from the folder that contains manage.py')
 s = p.read_text(encoding='utf-8')
+if 'FP-WALL' in s:
+    sys.exit('Graffiti already installed.')
 
-SPR = '71,136;a38e2a67e1d3e3a64c1d1c1d1c1e1d1e2a61c1d3c1d2e1d1e2a58d1c7d1c1d4e2a55c9d1c1e2d2e2a53c2b1c1b1c1b1c6d4e1d1a51c4b1c1b1c2d1c2d3e1d1e1d1e2a50c1b1c1b1c1b1c1b1c1b1c4d2e1d1e1d1e2a49c2b1c2d1c1d1c1d1c1d1c1d4e1d3e1a49c1b1c2d8e1d5e1d3a49c1d4e1d1e1d1e1d1e9d1e1a49d2e1d1e1d3e1d1e1d1e7d3a49e2d3e1d1e1d1e1d1e9d2a49e1d2c1d7c2d1e7d1a49e2d2c1d5c3d2e7a49e1c4b1d3c5d2e6a49e1d3c1d2e2d1c1d1c1d1c1d1e5a50e1d2c1d2e3d2c1d2e1d1e5a49e3d1e1d1e7d1e7d1e2a47d1e1d5e4d2e1d1e7d1e1a47e3d5e1d1e1d3e7d1e2a47d1e1d1c2d3c1d3c1d1c1e5d2e1a48e1d2c1d6e1d2c1d2e7a49e1c1d1c2d1e1d2c3d1c1d1e6a51d4e5d5e5a52d3e1d5e1d3e1d1e2a54e1d1e1d1e1d3e1d1e1d1e5a55e1d8e2d1e4a55e2d1e1d1e1d1e8a56e1d7e7a56e2d2c1d1c1d2e6a56e1d2c5d1e6a56e2d2c1d1c2d1e6a56e1d4c3d1e6a55e1d1e1d1e1d2c1d2e6a53e2d8c1d1e6d1a50d1c1d2e1d1e1d7e7d1a46e1d1c3b1c1d6c1d1c1d1e10a42e1d1c7d7c1d2e9d1e2a36e1d2c1d1c4b1c1b1c1b1d3c1d1c1d1c1d2e5d1e1d1e1d1e1d1e2a31d2c1d1c1d1c10b1d8e9d1e1d1e1d1e1d1e1a26e1d1c1d1c8b1c3b1c1b1c1b1c1d2c3d1c1e5d3e1d2e2d1e1d1e2a23e1d1c1d1c3d1c14b1c2d1c1d2e1d1e3d1e1d1e1d1e5d1e1d1e3a20e1c9b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d6e1d1e3d7e1a18e2c12b1c7b1c3b1c3b1c2d1c1d4e1d1e3d7e1d1e1a17e1c10b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c4d1c1d4e3d4c1d6e1a15e1d1c32d1c1d4e3d11e2a14e2c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c8d1c1d2e1d4c1d1c1d3c1d3a14e2c29d1c5d3c1d14e1d1a13e2c2b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c7b1c4d1c1d1c1d5c1d1c1d3c1d3e1a12e2c5b1c22d1c1d1c5d6e1d6c1e1d1c1d4a11e2d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c1b1c1d2c1d1c1d5c1d1c1d2c1b1d1c1d1c1a11e2c4b1c3b1c1b1c18d1c6d2c1d1c1d9c1d1c3d2c1a11e2c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c2d1c2b1c1b1c2d1c3d1c1d7c1d1c4d2c1a11e2c2b1c3b1c1b1c1b1c16d1c7d3c1d1c1d6e1d4c3d1c2a10e2d1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c3b1c1b1c3d2c1d1c3d1c1d5c1d1c7a10e2d1c2b1c1b1c3b1c1b1c1b1c21d2c1d1c1d1c1d1c1d9c3d1b1d1a10e2c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c4d1c5d1c1d1c1d5c1d1c2b1c1b1c2a10e2d1c2b1c3b1c1b1c1b1c22d3c1d1c1d1c1d1c1d4e1d4c6a10e2b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d2c7d1c1d1c1d1c1d1c1d1c1b2c1b1c2a10e1d1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c18e1d2c5d3c1d3c1d2c1b1c1b1c3a10e1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c2d3c2b1c4d1c1d1c1d1c1d1c2b1c1b1c1b1c2a10e1d1c3b1c1b1c1b1c1b1c1b1c20d3c7d1c1d5c1d1b1c1b1c1b1c3a9e2d1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c1b1c1b1d1c3d3c1d1b5c1b1c2a9e2c2b1c3b1c1b1c1b1c3b1c7b1c3b1c6d3c9d5c2b1c1b1c1b1c1b1d1a8e3c1b1c1b1c1b1c1b3c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c3b1d3c2b1c1b1c2d1b1c2d1c4b3c1b1c1b1c2a8e3c4b1c1b1c1b1c1b1c21d1e1d1c6d1c3d1c6b1c1b1c1b1c3a8e2d1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d2c1b1c1b1c2d1c2b1c5b1c1b5c1b1c2a8e2d1c2b1c1b1c1b1c1b1c1b1c3b1c3b1c12d3c5d2c1b1c2d1c4b1c1b1c1b1c1b1c3a7e3c2b1c1b1c1b1c1b5c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3d2c2b1c4d1b1c1b1d1c4b5c1b1c1b1c2a8e2d1b1c3b1c1b1c1b1c1b1c1b1c18d3c5d1c3d5c2b1c1b1c1b1c1b1c4a7e1d1b1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c2b1c2d1c2b1c2d1c1d1c3b6c1b1c3a7e1c4b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c7d1e1d1c4d1c1d1c3e1d4c1d1b1c1b1c1b1c1b1c5a4e2c2b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c2b1c2d1c2b1d5c2b5c1b1c1b1c5a1e3d2b1c1b1c3b1c1b1c1b1c1b1c1b1c3b1c12d2e1c5d2c1b1c1d3e1d2c2b1c1b1c1b1c1b1c4d2a2e1d1e1b1c1b1c1b3c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d2c1b1c2d1c1d1c4d2c1d1c2b7c1b1c3d1e2a1e3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c6d3c3d5c3e1d4b1c1b1c1b1c1b1c1b1c1b1c2d1a3e3b1c1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1d1c1b1c2d1c1d3c2d4c1b6c1b1c1b1c1b1c1d1a3e4c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c4d3c3d5c2d1e1d1e1d2b1c1b1c1b1c1b1c1b1c3b1e1a3e3c2b1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d2c3d1c1d1c1d2c2d5c2b11c2a3e3d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c6e1d2c1d1c1d5c1d2e1d4c1e1b1c1b1c1b1c1b1c1b1c2e1a4e2c2b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1c3d1c1d1c1d1c3e1d4c2a1c1b3c1b1c1b1c1b1c2a4e1d1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c4e1d2c1d3c1d3c1d4e1d1c2a1c2b1c1b1c1b1c1b1c1b1d1a4e1d1b3c1b5c1b5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c3d1c1d1c1d1c1d7c1d1a1c1b5c1b1c1b1c2a4d1c2b1c1b1c1b1c1b1c1d1c1b1c1b1c1b1c1b1c3b1c3b1c1b1c4e1d2c1d1c1d1c1d1c1d2e1d1e1d1e1d1c1d1a2c1b1c1b1c1b1c1b1c3a4c2b1c1b1c1b1c1b2c1d1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d3c1d1c5d1c1d6e1c1d1a2b7c1b1c2a4d1c4b1c1b1c1b1d1c2b1c1b1c1b1c3b1c3b1c8e1d4c3d1c1d2e1d3e1d3a3b1c1b1c1b1c4d1a4c2b1c1b1c1b1c1b3c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c5d1c1d8c1a3c1b3c1b1c4a4d1c2b1c3b1c1b1d1b1c1b1c1b1c3b1c1b1c1b1c3b1c3b1c1d1e1d4c3d1c1d8e1c1a3b1c1b1c1b1c1b1c2d1a4c2b1c1b1c1b1c1b1c3b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c5d10c2a2b2c1b1c1b1c2d1c1a4d1c10b1c1b1c1b1c1b1c3b1c3b1c7d1e1d2c1d1c3d1c1d2e1d1e1d1e1d2b1c1a2b1c4d5a4d1c2d5c2b5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c5d10c1b1a2c1b1c2d4e1d1a5d3e1d4c2b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c1d1e1d2c1d1c3d1c1d7c1d1c2d1a1c3d4e3a5d7c3b4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c7d1c1d5c1d1c2b1c1a1d1c1d1c1d4e2a5d8c2b1c1b1c1b1c1b1c3b1c3b1c7d1e1d2c5d8e1d2c2b1a2c2d2e1d1e3a5e1d6c1d1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c2b1c4d3c1d1c1d3c2b1c1a2b1c2d4e2a5e1d7c2b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1d2e1d2c5d1c1d3c1d1c1d3c2b1d1a1c2d4e3a6d6c1d1c1b4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d4c3b1c4d3c1d3c2b1c2a1c3d2e1d1e2a6d7c2b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3d1e1d4c3d1c3d2e1d3e1c4a1c2d4e2a7d8c1b2c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c1d3c6b1d3c1d1c4b1a1b1c2d2e1d1e1a7e1d6c2b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1d2c1d2c1d3c1d5c1d5c1d1c2d1c2d4e2a7e1d1c1d5c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1b1c4d11c1d1c1d1c2b1d1c3d2e1d1e1a8d8b1c1b1c1b1c1b1c3b1c1b1c1b1c3b1c2d3c2b1c2d2e1d3e1d6c1d1c3d1c1d3e3a8d1c1d5c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3b1c1b1c1b1c4d1c1d1c2b1c2d1c2b1c4d1c1e3a8e1d7b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1d2c2b1c1b1c1b1c3b1c2d5c3a1c1d4e2a9d6c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d2e1d2c2b1c1b1c1b1c4d3c1d3c2d1c2d2e1d1e1a9d7c2b1c1b1c1b1c3b1c3b1c1b1c1b1c4d2e1d3c6d5c1d2e1d2c1d1c1d1c1d1e3a9d2c1d3c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1d1c1d7c3d1c1d1c3d3c1d1c1d1c3d2e1d1e1a9e1d6c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d11c1d1c1d1c1d5c2e1a1c1d1c1d2e1a11d7b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d7c1d1c1d1c1d1c1d1c1d1c1d1c2b1e1a1d1c1d2e1d1a11d7c1b1c1b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c1d3e1d6c1d1c1d1c1d5c2d1e1c3e3a11d1c1d5b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b1c2d5c1d1c1d1c1d1c3d1c2b1c2e2c2d2e1d1a11e1d7b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c2d5c1d1c1d1c3d1c1d1c2b1c1e2c1d2e1d1e1a12d2c1d3c1b2c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c11b1c7b1c1e1d1c1d2e1d1a12d7c2b1c1b1c3b1c7b1c3b1c1b1c1b1c3b1c3b1c1b1c1b1c8d4e3a12d4c1d3b3c1b5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b7c1b1c7b1c1d3e1d1a12e1d8c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c6d1c3d2e1d1e1a12e1d1c1d1c1d1c1d2c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b7c1b1c3b1c3b1c1b1c1b1c4d1c3d2e2a13d2c1d5c2b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c17d1c1d1c1e3a13d1c1d1c1d1c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c2d1b1c1b1c1b1c1b1c1b1c1b1c1b1c6d1c1d1a15d6c1b1c3b1c3b1c1b1c1b1c3b1c1b1c1b1c1b1c2d1c1d1c17d1c3a15d2c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c6b1c1b1c1b1c10d1a15e1c1d3c4b1c1b1c1b1c3b1c3b1c3b1c3b1c7b1c3b1c14a16d1c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1a16d2c1d1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c8a16e1c1d1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1a17d1c2b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c1e1a17d1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1a19b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c3e1a18c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b3c1b1c3b1c1b1d1a18b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c6a18b2c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b15c1b1c1b1c1b1c3b1c1a18b1c1b1c1b1c1b1c1b1c1b1c1b1c11b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c6a18c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b11c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1a18c2b1c1b1c1b1c3b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c2a5'
-CSS = """/* FP-SPRITE: the photo is placed so it lines up exactly with the pixel grid */
-.real img{position:absolute;max-width:none;object-fit:fill;width:139.81%;height:148.29%;left:-26.35%;top:-48.29%;transform:none}
-/* /FP-SPRITE */
+
+def sub(old, new):
+    global s
+    if s.count(old) != 1:
+        sys.exit('Anchor not found exactly once, nothing written:\n  ' + old[:70])
+    s = s.replace(old, new, 1)
+
+
+CSS = r"""
+/* FP-WALL */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wall{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;user-select:none;-webkit-user-select:none}
+.wall::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 74% 24%,rgba(47,60,255,.35) 0 9px,transparent 10px),radial-gradient(circle at 78% 30%,rgba(255,197,46,.7) 0 5px,transparent 6px),radial-gradient(circle at 70% 31%,rgba(21,19,59,.3) 0 3px,transparent 4px),radial-gradient(circle at 18% 70%,rgba(255,197,46,.6) 0 7px,transparent 8px),radial-gradient(circle at 22% 66%,rgba(47,60,255,.3) 0 3px,transparent 4px)}
+.wall-in{position:absolute;left:-3%;top:9%;display:grid;justify-items:start;transform:translate(calc(var(--wx,0)*-18px),calc(var(--wy,0)*-12px)) rotate(-6deg);transform-origin:0 0}
+.wall .g{display:block;font:800 clamp(4.2rem,15.5vw,15rem)/.8 var(--display);font-stretch:75%;letter-spacing:-.02em;text-transform:uppercase;white-space:nowrap;color:transparent;-webkit-text-stroke:2px rgba(21,19,59,.3);text-shadow:.045em .045em 0 rgba(21,19,59,.07);animation:paint 1.1s var(--ease) both;animation-delay:calc(var(--i)*.22s + .25s)}
+.wall .g1{margin-left:8%;-webkit-text-stroke-color:rgba(47,60,255,.4);text-shadow:.045em .045em 0 rgba(47,60,255,.12)}
+.wall .g2{margin-left:2%;color:rgba(255,197,46,.55);-webkit-text-stroke:0;text-shadow:none;-webkit-mask:radial-gradient(circle,#000 58%,transparent 64%) 0 0/7px 7px;mask:radial-gradient(circle,#000 58%,transparent 64%) 0 0/7px 7px}
+@keyframes paint{from{clip-path:inset(-10% 101% -10% -2%)}to{clip-path:inset(-10% -6% -10% -2%)}}
+.drips{position:absolute;left:0;right:0;top:100%;height:0}
+.drips i{position:absolute;top:0;width:8px;height:var(--h);border-radius:0 0 8px 8px;background:rgba(47,60,255,.4);transform-origin:top;animation:drip 1.4s var(--ease) both;animation-delay:calc(1.4s + var(--d))}
+@keyframes drip{from{transform:scaleY(0)}}
+.spk{position:absolute;width:34px;height:34px;background:var(--sun);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);transform:scale(var(--s,1));animation:spin 6s linear infinite}
+@keyframes spin{to{transform:scale(var(--s,1)) rotate(360deg)}}
 """
 
-s, n = re.subn(r"SPR='[^']*'", lambda m: "SPR='" + SPR + "'", s, count=1)
-if n != 1:
-    sys.exit('Could not find the SPR=... pixel data in the file. Nothing was changed.')
-if 'FP-SPRITE' in s:
-    s = re.sub(r'/\* FP-SPRITE.*?/\* /FP-SPRITE \*/\n', lambda m: CSS, s, count=1, flags=re.S)
-elif s.count('</style>') == 1:
-    s = s.replace('</style>', CSS + '</style>', 1)
-else:
-    sys.exit('Could not find the closing style tag. Nothing was changed.')
+JS = r"""/* FP-WALL: the role text as graffiti behind the hero */
+  (function(){
+    var w=d.querySelector('.wall');if(!w)return;
+    var parts=(w.getAttribute('data-role')||w.textContent).split(/\s*[|\u2022\u00b7\/,]\s*/).map(function(t){return t.trim()}).filter(Boolean).slice(0,4);
+    if(!parts.length)return;
+    var dr='',k;
+    for(k=0;k<7;k++)dr+='<i style="left:'+(6+k*11+(k*7)%9)+'%;--h:'+(26+(k*37)%58)+'px;--d:'+(k*.17).toFixed(2)+'s"></i>';
+    w.innerHTML='<div class="wall-in">'+parts.map(function(t,i){return '<span class="g g'+(i%3)+'" style="--i:'+i+'">'+esc(t)+'</span>'}).join('')+'<div class="drips">'+dr+'</div></div>'+
+      '<b class="spk" style="left:57%;top:13%"></b><b class="spk" style="left:88%;top:58%;--s:.6"></b>';
+    if(!reduce)addEventListener('pointermove',function(e){
+      w.style.setProperty('--wx',((e.clientX/innerWidth-.5)*2).toFixed(2));
+      w.style.setProperty('--wy',((e.clientY/innerHeight-.5)*2).toFixed(2));
+    },{passive:true});
+  })();
 
-shutil.copy(p, p.with_name(p.name + '.bak5'))
+  /* Init */"""
+
+# 1) remove the counters
+s, n = re.subn(r'[ \t]*<div class="stats">\n(?:[ \t]*<div class="stat">[^\n]*</div>\n)+[ \t]*</div>\n', '', s, count=1)
+if n != 1:
+    sys.exit('Could not find the counters block. Nothing was changed.')
+
+# 2) capsule -> hidden text for screen readers + graffiti wall
+sub('<span class="role">{{ profile.role }}</span>', '<span class="sr-only">{{ profile.role }}</span>')
+sub('<div class="stk" aria-hidden="true"></div>',
+    '<div class="stk" aria-hidden="true"></div>\n    <div class="wall" aria-hidden="true" data-role="{{ profile.role }}"><span class="g g1">{{ profile.role }}</span></div>')
+sub('/* Init */', JS)
+sub('</style>', CSS + '</style>')
+
+shutil.copy(p, p.with_name(p.name + '.bak6'))
 p.write_text(s, encoding='utf-8')
-print('Done. Backup saved as ' + p.name + '.bak5. Push to Render and hard-refresh (Ctrl+Shift+R).')
+print('Done. Backup saved as ' + p.name + '.bak6. Push to Render and hard-refresh (Ctrl+Shift+R).')
