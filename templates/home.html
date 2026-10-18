@@ -287,6 +287,11 @@ html.hm .tp{display:none}
 .wall .dr{animation:drip 1.3s var(--ease) both;transform-box:fill-box;transform-origin:50% 0}
 @keyframes drip{from{transform:scaleY(0)}}
 .wall.still .wg,.wall.still .dr{animation:none}
+
+/* qr block in contact section */
+.qr-block{margin-top:28px;display:flex;align-items:center;gap:16px}
+.qr-block img{width:88px;height:88px;border:2px solid rgba(255,255,255,.55);border-radius:14px;background:#fff;flex:none}
+.qr-block figcaption{font:400 italic 1rem/1.4 var(--serif);opacity:.82}
 </style>
 </head>
 <body>
@@ -436,6 +441,10 @@ html.hm .tp{display:none}
           {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank" rel="noopener" aria-label="LinkedIn"><svg class="ic"><use href="#i-linkedin"/></svg></a>{% endif %}
           {% if profile.instagram %}<a href="{{ profile.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><svg class="ic"><use href="#i-instagram"/></svg></a>{% endif %}
         </div>
+        <figure class="qr-block">
+          <img src="{% static 'qr.png' %}" alt="QR code linking to fenu.onrender.com/connect" loading="lazy" width="88" height="88">
+          <figcaption>Scan to connect</figcaption>
+        </figure>
       </div>
       <form method="post" class="contact-form">
         {% csrf_token %}

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+{% load static %}
+{% load video_filters %}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2F3CFF">
+<title>{{ profile.name }} — Connect</title>
+<meta name="description" content="{{ profile.role }} — Scan, tap, or click to connect with {{ profile.name }}.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens (same as home) ── */
+:root{
+  --ink:#15133B;--cobalt:#2F3CFF;--sun:#FFC52E;--mist:#EEF0FA;--paper:#fff;
+  --muted:rgba(21,19,59,.62);
+  --display:'Bricolage Grotesque',system-ui,sans-serif;
+  --serif:'Newsreader',Georgia,serif;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;height:100%}
+body{
+  min-height:100%;font:400 1rem/1.65 var(--serif);
+  background:var(--cobalt);color:#fff;
+  display:grid;place-items:center;
+  padding:clamp(24px,5vw,64px) clamp(16px,4vw,32px);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ── Noise overlay (matches home) ── */
+body::after{
+  content:"";position:fixed;inset:0;z-index:100;pointer-events:none;opacity:.06;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .08 0 0 0 0 .07 0 0 0 0 .23 0 0 0 1.4 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")
+}
+
+/* ── Dot-grid background ── */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(rgba(21,19,59,.35) 1.4px,transparent 2px) 0 0/18px 18px;
+}
+
+/* ── Card ── */
+.card{
+  position:relative;z-index:1;
+  width:min(420px,100%);
+  background:var(--paper);color:var(--ink);
+  border:2.5px solid var(--ink);
+  border-radius:32px 32px 32px 8px;
+  box-shadow:10px 10px 0 var(--sun);
+  overflow:hidden;
+  animation:rise .65s var(--ease) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(28px) scale(.97)}}
+
+/* ── Card header ── */
+.card-header{
+  padding:clamp(20px,4vw,28px) clamp(20px,4vw,28px) 0;
+  display:flex;align-items:center;gap:14px;
+}
+.avatar-wrap{
+  position:relative;flex:none;
+  width:clamp(64px,14vw,80px);height:clamp(64px,14vw,80px);
+}
+.avatar-wrap img{
+  width:100%;height:100%;object-fit:cover;object-position:50% 25%;
+  border-radius:50%;border:2.5px solid var(--ink);
+  display:block;
+}
+.avatar-initial{
+  width:100%;height:100%;border-radius:50%;border:2.5px solid var(--ink);
+  background:var(--cobalt);color:#fff;
+  font:800 2rem/1 var(--display);display:grid;place-items:center;
+}
+.badge-dot{
+  position:absolute;bottom:2px;right:2px;
+  width:14px;height:14px;background:#22C55E;
+  border:2px solid var(--paper);border-radius:50%;
+}
+.name-block{flex:1;min-width:0}
+.name-block h1{
+  font:800 clamp(1.3rem,4.5vw,1.7rem)/1.05 var(--display);
+  font-stretch:80%;letter-spacing:-.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.name-block .tagline{
+  margin-top:4px;font:400 italic .9rem/1.3 var(--serif);
+  color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+
+/* ── Divider ── */
+.divider{height:2px;background:var(--ink);margin-top:clamp(16px,3vw,22px);opacity:.12}
+
+/* ── Card body ── */
+.card-body{padding:clamp(16px,4vw,24px) clamp(20px,4vw,28px)}
+
+.links-label{font:700 .8rem/1 var(--display);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.links{display:flex;flex-direction:column;gap:10px}
+.link-row{
+  display:flex;align-items:center;gap:12px;
+  padding:.65em 1em;
+  font:600 .95rem/1.2 var(--display);
+  background:var(--mist);border:2px solid var(--ink);border-radius:14px;
+  color:var(--ink);text-decoration:none;
+  transition:background .2s var(--ease),transform .2s var(--ease),box-shadow .2s var(--ease);
+}
+.link-row:hover{
+  background:var(--ink);color:#fff;
+  transform:translate(-2px,-2px);
+  box-shadow:4px 4px 0 var(--cobalt);
+}
+.link-row:hover .hint{color:#fff;opacity:.55}
+.link-row svg{flex:none;width:18px;height:18px;fill:currentColor;transition:fill .2s}
+.link-row.email-row svg{fill:none;stroke:currentColor;stroke-width:1.5;transition:stroke .2s}
+.link-row.email-row:hover svg{stroke:#fff}
+.link-row:hover svg{fill:#fff}
+.link-row .lbl{flex:1}
+.link-row .hint{font:400 .8rem/1 var(--serif);font-style:italic;color:var(--muted);white-space:nowrap;transition:color .2s}
+
+/* ── vCard download button ── */
+.vcard-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
+  margin-top:18px;padding:.85em 1.4em;
+  font:700 1rem/1 var(--display);
+  color:var(--ink);background:var(--sun);
+  border:2.5px solid var(--ink);border-radius:99px;
+  box-shadow:4px 4px 0 var(--ink);
+  text-decoration:none;
+  transition:transform .2s var(--ease),box-shadow .2s var(--ease);
+}
+.vcard-btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+.vcard-btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.vcard-btn svg{flex:none;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Card footer ── */
+.card-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:14px clamp(20px,4vw,28px) clamp(16px,3vw,22px);
+  border-top:2px solid rgba(21,19,59,.1);
+  font:600 .78rem/1 var(--display);color:var(--muted);
+}
+.card-foot a{color:var(--cobalt);text-decoration:underline;text-underline-offset:3px}
+.card-foot a:hover{color:var(--ink)}
+.avail{display:flex;align-items:center;gap:6px}
+.pulse{
+  display:inline-block;width:8px;height:8px;background:#22C55E;border-radius:50%;
+  animation:pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.5)}50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+
+/* ── Focus ── */
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
+.card :focus-visible{outline-color:var(--sun)}
+
+/* ── Reduced motion ── */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- SVG icon sprites (same as home.html) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 0.297C5.373.297 0 5.67 0 12.297c0 5.302 3.438 9.8 8.205 11.387.6.111.82-.261.82-.579 0-.285-.011-1.04-.017-2.042-3.338.726-4.042-1.61-4.042-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.73.083-.73 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.809 1.305 3.495.998.108-.776.418-1.305.762-1.604-2.665-.304-5.466-1.334-5.466-5.93 0-1.31.47-2.382 1.236-3.222-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.655 1.653.243 2.874.119 3.176.77.84 1.236 1.912 1.236 3.222 0 4.61-2.804 5.625-5.475 5.921.43.372.815 1.103.815 2.222 0 1.606-.015 2.898-.015 3.293 0 .321.217.694.825.576C20.565 22.092 24 17.598 24 12.297 24 5.67 18.627.297 12 .297z"/></symbol>
+  <symbol id="i-linkedin" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.039-1.852-3.039-1.853 0-2.136 1.445-2.136 2.939v5.669H9.351V9h3.413v1.561h.049c.476-.9 1.637-1.852 3.372-1.852 3.604 0 4.268 2.373 4.268 5.459v6.284zM5.337 7.433a2.066 2.066 0 1 1 0-4.132 2.066 2.066 0 0 1 0 4.132zm1.777 13.019H3.559V9h3.555v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.727v20.545C0 23.226.792 24 1.771 24h20.451C23.2 24 24 23.226 24 22.272V1.727C24 .774 23.2 0 22.225 0z"/></symbol>
+  <symbol id="i-instagram" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.97.24 2.43.403a4.92 4.92 0 0 1 1.72 1.088 4.92 4.92 0 0 1 1.088 1.72c.163.46.35 1.26.403 2.43.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.054 1.17-.24 1.97-.403 2.43a4.92 4.92 0 0 1-1.088 1.72 4.92 4.92 0 0 1-1.72 1.088c-.46.163-1.26.35-2.43.403-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.054-1.97-.24-2.43-.403a4.92 4.92 0 0 1-1.72-1.088 4.92 4.92 0 0 1-1.088-1.72c-.163-.46-.35-1.26-.403-2.43C2.175 15.747 2.163 15.367 2.163 12s.012-3.584.07-4.85c.054-1.17.24-1.97.403-2.43a4.92 4.92 0 0 1 1.088-1.72 4.92 4.92 0 0 1 1.72-1.088c.46-.163 1.26-.35 2.43-.403C8.416 2.175 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.78.13 4.842.31 4.042.652a6.978 6.978 0 0 0-2.53 1.64A6.978 6.978 0 0 0 .652 4.042C.31 4.842.13 5.78.072 7.052.013 8.332 0 8.741 0 12c0 3.259.013 3.668.072 4.948.058 1.272.238 2.21.58 3.01a6.978 6.978 0 0 0 1.64 2.53 6.978 6.978 0 0 0 2.53 1.64c.8.342 1.738.522 3.01.58C8.332 23.987 8.741 24 12 24s3.668-.013 4.948-.072c1.272-.058 2.21-.238 3.01-.58a6.978 6.978 0 0 0 2.53-1.64 6.978 6.978 0 0 0 1.64-2.53c.342-.8.522-1.738.58-3.01.059-1.28.072-1.689.072-4.948s-.013-3.668-.072-4.948c-.058-1.272-.238-2.21-.58-3.01a6.978 6.978 0 0 0-1.64-2.53A6.978 6.978 0 0 0 19.958.652C19.158.31 18.22.13 16.948.072 15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a3.999 3.999 0 1 1 0-7.998 3.999 3.999 0 0 1 0 7.998zm6.406-11.845a1.44 1.44 0 1 1-2.881 0 1.44 1.44 0 0 1 2.881 0z"/></symbol>
+</svg>
+
+<article class="card" role="main" aria-label="Digital identity card for {{ profile.name }}">
+
+  <!-- ── Header: avatar + name ── -->
+  <div class="card-header">
+    <div class="avatar-wrap">
+      {% if profile.profile_image %}
+        <img src="{{ profile.profile_image|safe_url }}" alt="Photo of {{ profile.name }}">
+      {% else %}
+        <div class="avatar-initial" aria-hidden="true">{{ profile.name|first }}</div>
+      {% endif %}
+      <span class="badge-dot" title="Available for opportunities"></span>
+    </div>
+    <div class="name-block">
+      <h1>{{ profile.name }}</h1>
+      <p class="tagline">{{ profile.role }}</p>
+    </div>
+  </div>
+
+  <div class="divider" aria-hidden="true"></div>
+
+  <!-- ── Body: contact links ── -->
+  <div class="card-body">
+    <p class="links-label">Reach me</p>
+    <nav class="links" aria-label="Contact and social links">
+
+      <!-- Email -->
+      <a href="mailto:fenuphilip19@gmail.com" class="link-row email-row" id="connect-email">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="m2 7 10 7 10-7"/>
+        </svg>
+        <span class="lbl">fenuphilip19@gmail.com</span>
+      </a>
+
+      <!-- GitHub -->
+      {% if profile.github %}
+      <a href="{{ profile.github }}" target="_blank" rel="noopener" class="link-row" id="connect-github">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-github"/></svg>
+        <span class="lbl">GitHub</span>
+        <span class="hint">github.com</span>
+      </a>
+      {% endif %}
+
+      <!-- LinkedIn -->
+      {% if profile.linkedin %}
+      <a href="{{ profile.linkedin }}" target="_blank" rel="noopener" class="link-row" id="connect-linkedin">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-linkedin"/></svg>
+        <span class="lbl">LinkedIn</span>
+        <span class="hint">linkedin.com</span>
+      </a>
+      {% endif %}
+
+      <!-- Instagram -->
+      {% if profile.instagram %}
+      <a href="{{ profile.instagram }}" target="_blank" rel="noopener" class="link-row" id="connect-instagram">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-instagram"/></svg>
+        <span class="lbl">Instagram</span>
+        <span class="hint">instagram.com</span>
+      </a>
+      {% endif %}
+
+    </nav>
+
+    <!-- vCard download -->
+    <a href="{% url 'download_vcard' %}" class="vcard-btn" id="connect-vcard">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>
+      </svg>
+      Save contact (.vcf)
+    </a>
+  </div>
+
+  <!-- ── Footer ── -->
+  <div class="card-foot">
+    <span class="avail">
+      <span class="pulse" aria-hidden="true"></span>
+      Open to opportunities
+    </span>
+    <a href="https://fenu.onrender.com" rel="noopener">fenu.onrender.com</a>
+  </div>
+
+</article>
+
+</body>
+</html>

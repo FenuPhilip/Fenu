@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponse
 from .models import Profile, Post, Contact, Skill, SiteStat
 
 VISIT_COOKIE_NAME = "visited_fenu"
@@ -62,4 +63,36 @@ def home(request):
             samesite="Lax",
         )
 
+    return response
+
+
+def connect(request):
+    profile = Profile.objects.first()
+    return render(request, "connect.html", {"profile": profile})
+
+
+def download_vcard(request):
+    profile = Profile.objects.first()
+    if not profile:
+        return HttpResponse("Not found", status=404)
+
+    lines = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        f"FN:{profile.name}",
+        f"TITLE:{profile.role}",
+        "EMAIL;TYPE=INTERNET:fenuphilip19@gmail.com",
+        "URL;TYPE=PORTFOLIO:https://fenu.onrender.com",
+    ]
+    if profile.github:
+        lines.append(f"URL;TYPE=GitHub:{profile.github}")
+    if profile.linkedin:
+        lines.append(f"URL;TYPE=LinkedIn:{profile.linkedin}")
+    if profile.instagram:
+        lines.append(f"URL;TYPE=Instagram:{profile.instagram}")
+    lines.append("END:VCARD")
+
+    content = "\r\n".join(lines) + "\r\n"
+    response = HttpResponse(content, content_type="text/vcard; charset=utf-8")
+    response["Content-Disposition"] = f'attachment; filename="{profile.name.replace(" ", "_")}.vcf"'
     return response

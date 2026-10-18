@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from feed.views import home
+from feed.views import home, connect, download_vcard
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -8,6 +8,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),
+    path('connect/', connect, name='connect'),
+    path('connect/vcard.vcf', download_vcard, name='download_vcard'),
 ]
 
 
