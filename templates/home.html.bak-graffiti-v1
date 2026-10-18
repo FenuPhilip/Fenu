@@ -10,7 +10,7 @@
 <meta name="description" content="{{ profile.role }} — {{ profile.bio|truncatewords:30 }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Kaushan+Script&display=swap" rel="stylesheet">
 <script>document.documentElement.className='js'</script>
 <style>
 /* Design system: ink + cobalt + sun on mist. Heavy condensed grotesque headlines, literary serif body. */
@@ -221,17 +221,6 @@ body::after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;op
   .post:hover::after{opacity:1}
 }
 
-.play{background:radial-gradient(rgba(47,60,255,.16) 1.4px,transparent 1.8px) 0 0/16px 16px}
-.studio{display:grid;gap:32px;align-items:center}
-@media(min-width:900px){.studio{grid-template-columns:1fr auto;gap:64px}}
-.studio canvas{width:min(100%,440px);aspect-ratio:1;image-rendering:pixelated;touch-action:none;cursor:crosshair;background-color:var(--paper);background-image:linear-gradient(rgba(21,19,59,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(21,19,59,.09) 1px,transparent 1px);background-size:calc(100%/32) calc(100%/32);border:2px solid var(--ink);border-radius:24px 24px 24px 8px;box-shadow:8px 8px 0 var(--cobalt)}
-.tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.sw{width:44px;height:44px;background:var(--c);border:2px solid var(--ink);border-radius:50%;box-shadow:3px 3px 0 var(--ink);transition:transform .2s var(--ease)}
-.sw.on{transform:translate(-2px,-2px) scale(1.12);outline:3px solid var(--cobalt);outline-offset:3px}
-.sw.er{background:repeating-conic-gradient(var(--mist) 0 25%,var(--paper) 0 50%) 0 0/12px 12px}
-.tool{padding:.7em 1.2em;font:600 .95rem/1 var(--display);background:var(--sun);border:2px solid var(--ink);border-radius:99px;box-shadow:3px 3px 0 var(--ink);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
-.tool:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
-.tool[aria-pressed=true]{background:var(--ink);color:#fff}
 
 .pal{position:fixed;inset:0;z-index:80;display:grid;align-items:start;justify-items:center;padding:14vh 16px 0;background:rgba(21,19,59,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .pal-box{width:min(560px,100%);padding:14px;background:var(--paper);border:2px solid var(--ink);border-radius:24px 24px 24px 8px;box-shadow:8px 8px 0 var(--sun);animation:pop .35s var(--ease) both}
@@ -248,6 +237,56 @@ body::after{content:"";position:fixed;inset:0;z-index:100;pointer-events:none;op
 
 html.night{filter:invert(1) hue-rotate(180deg)}
 html.night img,html.night video,html.night canvas,html.night iframe,html.night .rn,html.night .tp{filter:invert(1) hue-rotate(180deg)}
+
+/* FP-ALIGN: the mask stays on .real, the photo is scaled and moved on the img inside it.
+   --fs  = zoom (bigger = bigger head)
+   --fx / --fy = the point the zoom grows from (put it on the face)
+   --fdy = how far the photo moves up (negative) or down (positive) after zooming */
+.real{overflow:hidden;--fx:58%;--fy:39%;--fs:1.7;--fdy:-32%}
+.real img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transform-origin:var(--fx) var(--fy);transform:translateY(var(--fdy)) scale(var(--fs))}
+
+.real.dbg{-webkit-mask-image:none;mask-image:none}
+.pwrap.dbg canvas{opacity:.5}
+.tune{position:fixed;left:12px;bottom:96px;z-index:120;display:grid;gap:8px;width:260px;padding:14px;font:600 .85rem/1.2 var(--display);background:var(--paper);border:2px solid var(--ink);border-radius:18px;box-shadow:5px 5px 0 var(--sun)}
+.tune label{display:grid;gap:4px}
+.tune label.tr{display:flex;gap:8px;align-items:center}
+.tune output{font-weight:700;color:var(--cobalt)}
+.tune input[type=range]{width:100%}
+.tune button{padding:.6em 1em;font:700 .9rem/1 var(--display);background:var(--sun);border:2px solid var(--ink);border-radius:99px}
+.tune pre{white-space:pre-wrap;overflow-wrap:anywhere;font:500 .75rem/1.3 monospace;color:var(--muted)}
+.real{overflow:hidden;--fx:58%;--fy:39%;--fs:1.44;--fdx:-4%;--fdy:-29%}
+.real img{width:100%;height:100%;object-fit:cover;object-position:50% 30%;transform-origin:var(--fx) var(--fy);transform:translate(var(--fdx),var(--fdy)) scale(var(--fs))}
+
+/* FP-HAMMER */
+.real{-webkit-mask-image:radial-gradient(circle var(--rr,0px) at var(--rx,-99px) var(--ry,-99px),#000 55%,transparent 100%),var(--holes,none);mask-image:radial-gradient(circle var(--rr,0px) at var(--rx,-99px) var(--ry,-99px),#000 55%,transparent 100%),var(--holes,none);-webkit-mask-size:auto,100% 100%;mask-size:auto,100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat}
+.hrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:18px}
+.hbtn{display:inline-flex;align-items:center;gap:8px;padding:.55em 1.1em;font:600 .9rem/1 var(--display);background:var(--paper);border:2px solid var(--ink);border-radius:99px;box-shadow:3px 3px 0 var(--ink);transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.hbtn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--ink)}
+.hbtn[aria-pressed=true]{background:var(--sun)}
+.hbtn img{width:18px;height:24px;image-rendering:pixelated}
+.hammer{position:fixed;left:0;top:0;z-index:99;width:60px;height:80px;transform-origin:30px 76px;pointer-events:none;will-change:transform}
+.hammer img{width:100%;height:100%;image-rendering:pixelated;filter:drop-shadow(3px 3px 0 rgba(21,19,59,.35))}
+.hring{position:fixed;left:0;top:0;z-index:98;pointer-events:none;border:2px dashed rgba(21,19,59,.55);border-radius:50%}
+.deb{position:fixed;inset:0;z-index:97;width:100%;height:100%;pointer-events:none}
+html.hm .portrait,html.hm .portrait *{cursor:none!important}
+html.hm .tp{display:none}
+.thud{animation:thud .18s linear}
+@keyframes thud{25%{transform:translate(4px,3px)}50%{transform:translate(-4px,-2px)}75%{transform:translate(2px,-3px)}}
+.shock{position:fixed;z-index:96;width:20px;height:20px;margin:-10px 0 0 -10px;border:3px solid var(--sun);box-shadow:0 0 0 3px var(--ink);pointer-events:none;animation:shock .4s ease-out both}
+@keyframes shock{from{transform:scale(.3) rotate(0)}to{transform:scale(5) rotate(45deg);opacity:0}}
+/* FP-SPRITE: the photo is placed so it lines up exactly with the pixel grid */
+.real img{position:absolute;max-width:none;object-fit:fill;width:139.81%;height:148.29%;left:-26.35%;top:-48.29%;transform:none}
+/* /FP-SPRITE */
+
+/* FP-GRAFFITI */
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.wall{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none;user-select:none;-webkit-user-select:none;opacity:var(--wo,.95)}
+.wall svg{position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);overflow:visible;will-change:transform;transform:translate(calc(var(--wx,0)*-10px),calc(var(--wy,0)*-7px))}
+.wall .wg{animation:spray 1s var(--ease) both}
+@keyframes spray{from{opacity:0;transform:translateX(-40px)}}
+.wall .dr{animation:drip 1.3s var(--ease) both;transform-box:fill-box;transform-origin:50% 0}
+@keyframes drip{from{transform:scaleY(0)}}
+.wall.still .wg,.wall.still .dr{animation:none}
 </style>
 </head>
 <body>
@@ -268,20 +307,17 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
 <main>
   <section class="hero" id="hero">
     <div class="stk" aria-hidden="true"></div>
+    <div class="wall" aria-hidden="true" data-role="{{ profile.role }}"></div>
     <div class="wrap hero-grid has-img">
       <div class="hero-copy">
-        <span class="role">{{ profile.role }}</span>
+        <span class="sr-only">{{ profile.role }}</span>
         <h1>{{ profile.hero_title }}</h1>
         <p class="hero-sub">{{ profile.hero_subtitle }}</p>
         <p class="bio">{{ profile.bio|truncatewords:25 }}</p>
-        <div class="stats">
-          <div class="stat"><b data-count="{{ visits }}">{{ visits }}+</b><span>Visits</span></div>
-          <div class="stat"><b data-count="{{ skills|length }}">{{ skills|length }}+</b><span>Skills</span></div>
-        </div>
       </div>
       <figure class="portrait">
         <div class="pwrap">
-          <img class="real" src="{% static 'bluefenu.png' %}" alt="" aria-hidden="true">
+          <div class="real"><img src="{% static 'bluefenu.png' %}" alt="" aria-hidden="true"></div>
           <canvas id="pix" role="img" aria-label="Pixel portrait of {{ profile.name }}"></canvas>
         </div>
         <figcaption class="plinth">Poke the pixels</figcaption>
@@ -385,24 +421,6 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
     </div>
   </section>
   {% endif %}
-
-  <section class="sec play" id="play">
-    <div class="wrap studio">
-      <div>
-        <div class="head"><h2>Leave your mark.</h2><p>A tiny pixel studio. That bug is yours to recolor. Paint, mirror, then save it as a PNG.</p></div>
-        <div class="tools" role="group" aria-label="Pixel tools">
-          <button type="button" class="sw on" data-c="#15133B" style="--c:#15133B" aria-label="Ink"></button>
-          <button type="button" class="sw" data-c="#2F3CFF" style="--c:#2F3CFF" aria-label="Cobalt"></button>
-          <button type="button" class="sw" data-c="#FFC52E" style="--c:#FFC52E" aria-label="Sun"></button>
-          <button type="button" class="sw er" data-c="e" aria-label="Eraser"></button>
-          <button type="button" class="tool" id="pMir" aria-pressed="false">Mirror</button>
-          <button type="button" class="tool" id="pClr">Clear</button>
-          <button type="button" class="tool" id="pSave">Save PNG</button>
-        </div>
-      </div>
-      <canvas id="paint" width="32" height="32" role="img" aria-label="Pixel drawing canvas"></canvas>
-    </div>
-  </section>
 
   <section class="contact" id="contact">
     <div class="wrap contact-grid">
@@ -564,16 +582,16 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
   });
 
   /* Pixel portrait: a bitmap sprite of you; pixels scatter, assemble, dodge the pointer, glitch on a scan pass */
-  var cv=$('pix'), SPR='71,141;a37c2a67c1d2e1d1e1d1a64d1c1d1c1d2e1d2a61d8e3d1a58d1c1d1c1d1c1d1c1d2e1d2c1d1a55d1c1d1c1d1c1d1c1d1c1d2e1d1e1d1e1d1a52c3b1c1b1c1b1c1b1c2d2e1c1d2e1d1a51c4b1c4d1c1d1c1d2e1d1e3d1a49c2b1c1b1c1b1c1b1d1b1c2d1c1d3c1e1d1e1c1a48d1c2b1c1b1c1b1c1b1c1b1d1c1d2e1d1e1d1e1d2a48c2b1c1b1c1b1d1c4b1c2d1c1d2e1c1d2a48d1c1d1c1d6e1d1e1d1e1d3e1d1e1d1e1a48c2b1d3c1d6e1d1e1d1e1d1e1d3a48d2e1d1e1d1e1d1e1d1e1d1e9d1e1c1a47c1e1d1e1d1e1d1e1d1e1d1e1d1e7d3a48e2d1c1d2e1d1e1d1e1d3e7d1e1a48d2c1d1c1d1c1d3c2b1d1c1e7c1a48e1d2c1d1c1d2e1d2c1d1c1d2e6d1a48d2c1d1b1c2e1d2c1d1c3d2e3d1e1c1a48e1d4c1e3d2c1d1c1e1d2e5a48d2e1d5e3d2c1d2e1d1e5d1a47d1e3d1e1d1e1d1e3d1e1d1e7d1e1d1a46e1d1e1d2c1e1d1e1d1e2d4e8d1a46d1e1d2c1d2e1d3e1d3e7d1e1a47d3b1d3c1d1c1d3c1d1c1d1e4d3a48e1d2c1d3c1d2e1d2c1d2e7a48d2c1d1b1d2e1d2c1d1c1d1c1d2e3d1e1a50d1e1d3e3d1e1d3e1d1e3d1e1a51d4e1c1d4e1d2c1e1d1e1d1a54e1d1e1d5e1d1e1d1e1d1e3a54c1e1d4c1d2e1d1e1d1e1d1e1a56d1e1d1e1d1e1d1e8a56d8e3d1e3a55d2e1d2c1d2e1d1e5d1a55c1e1c1d1c2b1c2e7a55e1d1e1c1d1c1d1c1d2e6a55c1d3c4b1d1e2d1e3a54c1e1d1e1d1e1d2c1d2e6a53c1e1d1e1d3e1c1d1c1e7d1a50d1c1d2e1d1e1d1e1d3e9d1a47c1d1b1c1b1e1d4c1d1c1d1c1e7d3a43d2c1d1c2b1d2e1d1e1d2c1d1c1d2e7d1e1d1e1d1a37c1d1c1d1c2b1c1b1c1b1c1d6c1d1c1d2e7d3e1d2a32c1d1c1d1c1d1c1d1c3d1c2b1d4e1d5e1d1e7d1e1d1e1d1e1d2a27d1c3d1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c1d1c1d2e1d1e1d1e1d1e1d1e1d3e1d3e1d1a23c1d1c1d1c1d1c1d1c1d1c2b1d1c2b1c3b1c2d1c1d1c1d1c1d1e6d1e1d1e1d1e3d1e1d1e1d1e1a19c2d1c3d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d10e1d1e3d5e1d1e1c1a17c1d1c1d1c1d1c1d1c1d1c2b1d1c3d1c2b1d1c2b1d1c2b1c4d4e1d1e1d1e1d1e3d1e1d1e1d1e1d1e1a17c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c1d4e1d2c1d1c1d1c1d5a15d1c3d1c3d1c2b1c3b1d1c2b1d1c2b1c3b1c4d1c1d1c1d4e5d7e1d1e1d1a15b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1b1c2d1c1d1c1d2e3d2c1d1c1d1c1d4e1d1a13c3d1c1d1c1d1c1d1c1d1c3d1c3d1c3d1c3d1c3d1c1d1c1d1c1d6e1d1e1d7e1c1e2d1a13c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c2d1c1d1c1d5c1d1c1d1c1d1c1d3c1a13b1c3b1c3b1d1c2b1d1c2b1d1c2b1d1c2b1d1c3d1c1d1c1d1c1d1c1d3c1d4e1d8c1e1c1d1a12c2b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c2d1c1d1c1d1c1d5c1d1c1d1c1e1b1c1d2c1a12d1c2b1d1c2b1d1c3d1c3d1c1d1c1d1c3d1c3d1c1d1c1d1c3d1c1d6e1d1e1d4c1d2c2d3a12b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1d1c1d1c1d1c1d1c1d3c1d1c1d1c1d1b1d1b1d1c2a10c2b1c3b1c1b1c1b1c2d1b1c4d1c2b1d1c2b1d1c1d1c1d1c2b1d1c1d3c1d1c1d4e1d6c3d3c1a10c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c2d1c1d1c1d1c1d1c1d1c1d3c1d1c2b1c2d1b1c1a10c4b1d1c2b1c1b1c2d1c2b1d1c3d1c1d1c1d1c1d1c1d1c3d1c3e1d2c1d1c1d1c1d4e1d2c1d1c1d1c1d2c2a10c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c3d1c1d1c1d1c1d1c1d1c1d1c1d1c4b1c1b1d1a10c2b1c1b1c1b1c1b1c1b1c3b1d1c2b1d1c2b1d1c2b1d1c2b1c3b1d3c1d1c1d1c1d1c1d2e1d6c1d1b1d1b1c2a10c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c3d1c1d1c1d1c1d3c1d1c1d1b1c1b1c1b1c1a9c2d1c2b1c3b1c1b1c1b1d1c2b1d1c3d1c3d1c3d1c3d1c1e1d2c1d1c1d1c1d1c1d4e1d4c5d1b1a9b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3b1c1b1c1b1c2d1c1d1c1d1c1d1c1d1c2b1c1b1c1b1c1a9c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d1c2b1d1c2b1c3b1d1c1d2e1c1d1c5d3c1d3c1d2c1b1c1b1c1b1d1c1a9b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c2b1c1b1c2d1c1d1c1d1c1d1c2b1c1b1c1b1c1b1c1a9c1b1d1c2b1c1b1c1b1c1b1c1b1d1c2b1d1c3d1c2b1d1c2b1d1c3d3c1d1c3d1c1d1c1d7b1c1b1c1b1c4a9b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c1d1c2b1c1b1c1b1d1c2b1d1c1d1c1d1b1c1b1c1b1c1b1c1b1c1a8b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d1c2b1d1c2b1c3b1c3b1d2e1d2c2b1d1c1d1c1d1c1d1c1d3c2b1c1b1c1b1c1b1c2a8c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3b1c1b1c1b1c2d1b1c2d1c1d1c1d1b1c1b1c1b1c1b1c1b1c1a8c2b1c1b1c1b1c1b1c1b1c1b1c1b1d1c3d1c2b1c3b1d1c3d1c1d2e1c3d1c3d1c3d3c1d1c2b1c1b1c1b1c1b1c2a8c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c1b1c1b1d1c2b1c3b1c1b1c1b1c1b3c1b1c1b1c1a8b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1d1c2b1d1c3e1d2b1d1c2b1d2c1b1c2d1c1d1c2b1c1b1c1b1c1b1c1b1d1c1a8c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c2b1c1b1d1c1d1b1c1b1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1a7c3b1c3b1c1b1c1b1c3b1c3b1d1c2b1d1c3d1c3d2e1d2c2b1d3c1d1c1d5b1d1b1c1b1c1b1c1b1c2d1c1d1a6b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3b1c1b1c1b1d1c2b1c2d1c1d1c2b3c1b3c1b1c3b1a5c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1d1c2b1d1c1d2e1c2b1c2d1c1d1c3e1d4c2b1c1b1c1b1c1b1c1b1d1c1d1c1a4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2e1d1c1b1c1b1c2d1b1c1b1d1c1d3c2b1c1b1c1b1c1b1c1b1c5b1a3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1d1c3d1c3d2e1c1d1c3d2c1b1d4e1d2c2b1c1b1c1b1c1b1c2d1c1d1c1a4c1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c2d1c1d1b1c1b1c2d1c1d1c2b3c1b1c1b1c1b1c1b1c1b1a4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1d1c1e1d2c3d3c1d1c1d1b1d5c2b1c1b1c1b1c1b1c1b1c3b1a3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1c2b1d1c1d1c1d1c1d1c2d4c2b1c1b1c1b1c1b1c1b1c1b1c1b1a5b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d1c2b1d1c3e1d2c1d1c1d5c1d1c1e1d1e1d2b1c1b1c1b1c1b1c1b1c3b1d1a5c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c2b1d1c1d1c1d1c1d1b1d5c2b3c1b3c1b3c1b1a5b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d2e1d2c1d1c1d5c1d2e1d4c2b1c1b1c1b1c1b1c1b1c1b1c1a5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3b1c2d1c1d1c1d1c3e1d4c2b1c1b1c1b1c1b1c1b1c1b1c1b1a4c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c3b1d1c1d2e1d2c1d3c1d3c1d2e1d1e1d2b1c1b1c1b1c1b1c1b1c1b1c1b1d1c1a3b1c1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c1d1c1d1c1d1c1d1c1d3c1d1c2b3c1b3c1b1c1b1c1b1a4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d2e1d2c1d1c1d1c1d1c1d2e1d1e1d4c2b1c1b1c1b1c1b1c1b1c2d1b1a1b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c1d1c1d1c1d1c1d6e1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1a1d1c2b1c3b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c3b1d1c3d1c1d2e1d4c1d1c1d1c1d2e1d1e1d1e1d2c2b1c1b1c1b1c1b1c4d1c1a1b1c1b1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2e1d2c1d1c3d1c1d1c1d7c1d1b3c1b3c1b1c1b1c1b1a2c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d1c2b1d2e1d4c1d1c1d1c1d2e1d3e1d2c2b1c1b1c1b1c1b1c1b1c4a1b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c1d1c2b1c2d1c1d3c1d4c1b1c1b3c1b1c1b1c1b1c3a1d1c2b1d1c2b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1d1c3d1c1d2e1d2c1d1c1d1c1d2e1d1e1d1e1d1e1d1e1c2b1c1b1c1b1c1b1c2d1c1d1c1a1b1c1b1c1b1c2d1c2b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2e1d2c1d1b1c1b1c2d2e1d7c1b3c1b1c1b1d1c1d2e1d2a1d1c1d4e1d2c1d1b1c1b1c1b1c1b1c3b1c1b1c1b1c3b1c3b1d2e1d2c1d1c1d1c1d1c1d2e1d1e1d1e1d1e1c2b1c1b1c2d4e3d1a2d5c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2e1d2c1d1c1d1b1d1c1d1c1d5c1d1c2b1c1b3d1c1d4e3a2d1e1d1e1d6b1c1b1c1b1c3b1c3b1c3b1d1c2b1d1c1d2e1d2c1d1c1d1c1d11b1c1b1c1b1d1c1d2e1d1e3d1a2d3c1d3c1d1c2b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2e1c1d1c2b1c2d1c1d1c1d1c1d1c1d4c1b1c1b3c2d1c1d2e1d2a2c1e1d3e1d2c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d2e1d2c3d1c1d1c1d3c1d2e1d1e1c2b1c1b1c2d4e3c1a2d1c1d3c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c2b1c1b1d1c1d1c1d3c1d1c1d1c2b1c1b3c2d4e1d1a3c1d2e1d1e1d4b1c1b1c1b1c3b1c3b1c3b1d1c2b1c2d2e1d2c1d1c3d1c1d2e1d3e1d2c4b1c2d1c1e1d1e1d1e1a4d2c1d3c1d1c2b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d5b1c1b1d1b1c1b1c2e1d2c1d3b1c1b3c2d1c1d2e1d1a4d4e1d2c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d1c1e1c1d2e1c3d1c1d1c3e1d2c1d1c4b1c2d4e3a4c1d3c1d3c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c4d1c1d2e1c3d1c1d1c3d3c3d1b3c2d1c1d2e1d1a4d2e1d3e1d2b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c2e1c2d2c1d2e1d1e1d1e1d1e1d8c2b1c2d1c1d2e3a5d1c1d1c1d1c1d1c2b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d2b1c1b1c1b1c2d5c1d1c1d1c1d1c1d1c2b1c1b1c2d1c1d2e1c1a5d3e1d4c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3b1c1b1c1b1c2d7c1d1c1d1c1d1c1d1b1c1b1d4e3a5d3c1d3c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d3b1c1b1c1b1d1c1d2e1d1a6e1d3e1d2c2b1c1b1c3b1c3b1c3b1c3b1c2d2e1d2c1d1c2b1c4d1c1d1c1d3c1e1d2c3d1c1d2e3a6c1d1c1d1c1d1c1d1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c1d3c2b1c1b1c1b1c2d1c1d1c3d3c2b1c1b1d1c1d2e1a7d7c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d4e1d4c3d1c1d1c1d1c1d1c1d4e1c2b1d1c1d2e2a7c1d1c1d3c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d3c1d3c1d1c1d1c1d1c1d1c1d1c1d1c2b1c1b1c2e1d1e1a8d3e1d2c1d1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c4e1d1e1d1e1d6c1d3c1d4e1d2b1c1b1c2d2e1d1a8d1c1d1c1d3b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d7c1d1c1d1c1d1c1d1c1d1c1d1c2b1c1b3d1c1d2e1a8c1d4e1d2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2e1d3e1d2c1d1c1d1c1d1c1d1c1d3c1d1c2b1d1c1d2e1d1a8d1c1d1c1d1c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c1d3c1d1c1d1c3d1c2b1c1b1c1b1c1b1d1c1e1d1e1a9d7c2b1c3b1c3b1c3b1c3b1c1b1c1b1c2d1c1d7c1d1c1d1b1d1c1d1c1d1c4b1d1c1e1d1e1d1a9c1d1c1d3c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b2c1d1c1d2e1a9d4e1d2c2b1c1b1c1b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c1d1c1d1c3e1d3e1d1a9c1d3c1d3c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1b1c1b1c2d2e1d2a9d6e1d2c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d1c2b1c2d1c1d1c1d1c1d1c1d1c1e3d1a10d1c1d1c1d1c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b3c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c3d2e1d1a11d2c1d5c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c3d1c2b1c3b1d1c2b1d1c1d2e1d1e3a12c1d1c1d1c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1c3d1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d2e1d1a12d7b1c3b1c3b1c3b1c3b1c3b1c3b1c2d1c1d1c1d1c1d1c3d1c3d1c1d1c1d1c1d1c1e1c1d1a12c1d1c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3a14c1d3c2b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d2c1b1d1b1c1b1c1b1c1b1c1b1c2d1c3d1c1d1c1a14d1c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1a13c1d1c1d1c2b1c1b1c1b1c3b1c3b1d1c2b1d1c2b1c3b1c1b1c2d1c2b1c1b1c1b1c1b1c1b1c3b1c2d1c1d1c1a15c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1a15d3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1a15b1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1a16c2b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c3b1c1b1c1b1c1b1c1b1c3b1c3b1d1c2b1d1c2b1c2a16c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1a17c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1d1a16b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1a16c1b1c1b1c1b1c1b1c3b1c3b1d1c1d1c1d1c2b1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c2a16b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b3c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1a4';
+  var cv=$('pix'), SPR='71,136;a38e2a67e1d3e3a64c1d1c1d1c1e1d1e2a61c1d3c1d2e1d1e2a58d1c7d1c1d4e2a55c9d1c1e2d2e2a53c2b1c1b1c1b1c6d4e1d1a51c4b1c1b1c2d1c2d3e1d1e1d1e2a50c1b1c1b1c1b1c1b1c1b1c4d2e1d1e1d1e2a49c2b1c2d1c1d1c1d1c1d1c1d4e1d3e1a49c1b1c2d8e1d5e1d3a49c1d4e1d1e1d1e1d1e9d1e1a49d2e1d1e1d3e1d1e1d1e7d3a49e2d3e1d1e1d1e1d1e9d2a49e1d2c1d7c2d1e7d1a49e2d2c1d5c3d2e7a49e1c4b1d3c5d2e6a49e1d3c1d2e2d1c1d1c1d1c1d1e5a50e1d2c1d2e3d2c1d2e1d1e5a49e3d1e1d1e7d1e7d1e2a47d1e1d5e4d2e1d1e7d1e1a47e3d5e1d1e1d3e7d1e2a47d1e1d1c2d3c1d3c1d1c1e5d2e1a48e1d2c1d6e1d2c1d2e7a49e1c1d1c2d1e1d2c3d1c1d1e6a51d4e5d5e5a52d3e1d5e1d3e1d1e2a54e1d1e1d1e1d3e1d1e1d1e5a55e1d8e2d1e4a55e2d1e1d1e1d1e8a56e1d7e7a56e2d2c1d1c1d2e6a56e1d2c5d1e6a56e2d2c1d1c2d1e6a56e1d4c3d1e6a55e1d1e1d1e1d2c1d2e6a53e2d8c1d1e6d1a50d1c1d2e1d1e1d7e7d1a46e1d1c3b1c1d6c1d1c1d1e10a42e1d1c7d7c1d2e9d1e2a36e1d2c1d1c4b1c1b1c1b1d3c1d1c1d1c1d2e5d1e1d1e1d1e1d1e2a31d2c1d1c1d1c10b1d8e9d1e1d1e1d1e1d1e1a26e1d1c1d1c8b1c3b1c1b1c1b1c1d2c3d1c1e5d3e1d2e2d1e1d1e2a23e1d1c1d1c3d1c14b1c2d1c1d2e1d1e3d1e1d1e1d1e5d1e1d1e3a20e1c9b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d6e1d1e3d7e1a18e2c12b1c7b1c3b1c3b1c2d1c1d4e1d1e3d7e1d1e1a17e1c10b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c4d1c1d4e3d4c1d6e1a15e1d1c32d1c1d4e3d11e2a14e2c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c8d1c1d2e1d4c1d1c1d3c1d3a14e2c29d1c5d3c1d14e1d1a13e2c2b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c7b1c4d1c1d1c1d5c1d1c1d3c1d3e1a12e2c5b1c22d1c1d1c5d6e1d6c1e1d1c1d4a11e2d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c1b1c1d2c1d1c1d5c1d1c1d2c1b1d1c1d1c1a11e2c4b1c3b1c1b1c18d1c6d2c1d1c1d9c1d1c3d2c1a11e2c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c2d1c2b1c1b1c2d1c3d1c1d7c1d1c4d2c1a11e2c2b1c3b1c1b1c1b1c16d1c7d3c1d1c1d6e1d4c3d1c2a10e2d1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c3b1c1b1c3d2c1d1c3d1c1d5c1d1c7a10e2d1c2b1c1b1c3b1c1b1c1b1c21d2c1d1c1d1c1d1c1d9c3d1b1d1a10e2c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c4d1c5d1c1d1c1d5c1d1c2b1c1b1c2a10e2d1c2b1c3b1c1b1c1b1c22d3c1d1c1d1c1d1c1d4e1d4c6a10e2b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d2c7d1c1d1c1d1c1d1c1d1c1b2c1b1c2a10e1d1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c18e1d2c5d3c1d3c1d2c1b1c1b1c3a10e1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c2d3c2b1c4d1c1d1c1d1c1d1c2b1c1b1c1b1c2a10e1d1c3b1c1b1c1b1c1b1c1b1c20d3c7d1c1d5c1d1b1c1b1c1b1c3a9e2d1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c2b1c1b1c1b1d1c3d3c1d1b5c1b1c2a9e2c2b1c3b1c1b1c1b1c3b1c7b1c3b1c6d3c9d5c2b1c1b1c1b1c1b1d1a8e3c1b1c1b1c1b1c1b3c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c3b1d3c2b1c1b1c2d1b1c2d1c4b3c1b1c1b1c2a8e3c4b1c1b1c1b1c1b1c21d1e1d1c6d1c3d1c6b1c1b1c1b1c3a8e2d1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d2c1b1c1b1c2d1c2b1c5b1c1b5c1b1c2a8e2d1c2b1c1b1c1b1c1b1c1b1c3b1c3b1c12d3c5d2c1b1c2d1c4b1c1b1c1b1c1b1c3a7e3c2b1c1b1c1b1c1b5c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3d2c2b1c4d1b1c1b1d1c4b5c1b1c1b1c2a8e2d1b1c3b1c1b1c1b1c1b1c1b1c18d3c5d1c3d5c2b1c1b1c1b1c1b1c4a7e1d1b1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c2b1c2d1c2b1c2d1c1d1c3b6c1b1c3a7e1c4b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c7d1e1d1c4d1c1d1c3e1d4c1d1b1c1b1c1b1c1b1c5a4e2c2b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c2b1c2d1c2b1d5c2b5c1b1c1b1c5a1e3d2b1c1b1c3b1c1b1c1b1c1b1c1b1c3b1c12d2e1c5d2c1b1c1d3e1d2c2b1c1b1c1b1c1b1c4d2a2e1d1e1b1c1b1c1b3c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d2c1b1c2d1c1d1c4d2c1d1c2b7c1b1c3d1e2a1e3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c6d3c3d5c3e1d4b1c1b1c1b1c1b1c1b1c1b1c2d1a3e3b1c1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1d1c1b1c2d1c1d3c2d4c1b6c1b1c1b1c1b1c1d1a3e4c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c4d3c3d5c2d1e1d1e1d2b1c1b1c1b1c1b1c1b1c3b1e1a3e3c2b1c1b1c1b1c1b7c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d2c3d1c1d1c1d2c2d5c2b11c2a3e3d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c6e1d2c1d1c1d5c1d2e1d4c1e1b1c1b1c1b1c1b1c1b1c2e1a4e2c2b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1c3d1c1d1c1d1c3e1d4c2a1c1b3c1b1c1b1c1b1c2a4e1d1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c4e1d2c1d3c1d3c1d4e1d1c2a1c2b1c1b1c1b1c1b1c1b1d1a4e1d1b3c1b5c1b5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c3d1c1d1c1d1c1d7c1d1a1c1b5c1b1c1b1c2a4d1c2b1c1b1c1b1c1b1c1d1c1b1c1b1c1b1c1b1c3b1c3b1c1b1c4e1d2c1d1c1d1c1d1c1d2e1d1e1d1e1d1c1d1a2c1b1c1b1c1b1c1b1c3a4c2b1c1b1c1b1c1b2c1d1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1d3c1d1c5d1c1d6e1c1d1a2b7c1b1c2a4d1c4b1c1b1c1b1d1c2b1c1b1c1b1c3b1c3b1c8e1d4c3d1c1d2e1d3e1d3a3b1c1b1c1b1c4d1a4c2b1c1b1c1b1c1b3c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c5d1c1d8c1a3c1b3c1b1c4a4d1c2b1c3b1c1b1d1b1c1b1c1b1c3b1c1b1c1b1c3b1c3b1c1d1e1d4c3d1c1d8e1c1a3b1c1b1c1b1c1b1c2d1a4c2b1c1b1c1b1c1b1c3b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c5d10c2a2b2c1b1c1b1c2d1c1a4d1c10b1c1b1c1b1c1b1c3b1c3b1c7d1e1d2c1d1c3d1c1d2e1d1e1d1e1d2b1c1a2b1c4d5a4d1c2d5c2b5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c1d1c5d10c1b1a2c1b1c2d4e1d1a5d3e1d4c2b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c1d1e1d2c1d1c3d1c1d7c1d1c2d1a1c3d4e3a5d7c3b4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d3c7d1c1d5c1d1c2b1c1a1d1c1d1c1d4e2a5d8c2b1c1b1c1b1c1b1c3b1c3b1c7d1e1d2c5d8e1d2c2b1a2c2d2e1d1e3a5e1d6c1d1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3c2b1c4d3c1d1c1d3c2b1c1a2b1c2d4e2a5e1d7c2b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1d2e1d2c5d1c1d3c1d1c1d3c2b1d1a1c2d4e3a6d6c1d1c1b4c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d4c3b1c4d3c1d3c2b1c2a1c3d2e1d1e2a6d7c2b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3d1e1d4c3d1c3d2e1d3e1c4a1c2d4e2a7d8c1b2c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c1d1c1d3c6b1d3c1d1c4b1a1b1c2d2e1d1e1a7e1d6c2b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1d2c1d2c1d3c1d5c1d5c1d1c2d1c2d4e2a7e1d1c1d5c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1b1c4d11c1d1c1d1c2b1d1c3d2e1d1e1a8d8b1c1b1c1b1c1b1c3b1c1b1c1b1c3b1c2d3c2b1c2d2e1d3e1d6c1d1c3d1c1d3e3a8d1c1d5c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d3b1c1b1c1b1c4d1c1d1c2b1c2d1c2b1c4d1c1e3a8e1d7b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1d1e1d2c2b1c1b1c1b1c3b1c2d5c3a1c1d4e2a9d6c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d2e1d2c2b1c1b1c1b1c4d3c1d3c2d1c2d2e1d1e1a9d7c2b1c1b1c1b1c3b1c3b1c1b1c1b1c4d2e1d3c6d5c1d2e1d2c1d1c1d1c1d1e3a9d2c1d3c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1d1c1d7c3d1c1d1c3d3c1d1c1d1c3d2e1d1e1a9e1d6c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d11c1d1c1d1c1d5c2e1a1c1d1c1d2e1a11d7b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d7c1d1c1d1c1d1c1d1c1d1c1d1c2b1e1a1d1c1d2e1d1a11d7c1b1c1b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c1d3e1d6c1d1c1d1c1d5c2d1e1c3e3a11d1c1d5b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b1c2d5c1d1c1d1c1d1c3d1c2b1c2e2c2d2e1d1a11e1d7b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c2d5c1d1c1d1c3d1c1d1c2b1c1e2c1d2e1d1e1a12d2c1d3c1b2c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c11b1c7b1c1e1d1c1d2e1d1a12d7c2b1c1b1c3b1c7b1c3b1c1b1c1b1c3b1c3b1c1b1c1b1c8d4e3a12d4c1d3b3c1b5c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b7c1b1c7b1c1d3e1d1a12e1d8c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c6d1c3d2e1d1e1a12e1d1c1d1c1d1c1d2c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b7c1b1c3b1c3b1c1b1c1b1c4d1c3d2e2a13d2c1d5c2b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c17d1c1d1c1e3a13d1c1d1c1d1c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b1c1b1c1b1c2d1b1c1b1c1b1c1b1c1b1c1b1c1b1c6d1c1d1a15d6c1b1c3b1c3b1c1b1c1b1c3b1c1b1c1b1c1b1c2d1c1d1c17d1c3a15d2c1d1c1d1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1c6b1c1b1c1b1c10d1a15e1c1d3c4b1c1b1c1b1c3b1c3b1c3b1c3b1c7b1c3b1c14a16d1c1d1c2b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1d1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1a16d2c1d1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c8a16e1c1d1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c2d1a17d1c2b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c1e1a17d1c1b1c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1a19b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c3e1a18c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b3c1b1c3b1c1b1d1a18b1c1b1c1b1c1b1c3b1c3b1c3b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c6a18b2c1b3c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b15c1b1c1b1c1b1c3b1c1a18b1c1b1c1b1c1b1c1b1c1b1c1b1c11b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c6a18c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b3c1b11c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1a18c2b1c1b1c1b1c3b1c1b1c1b1c1b1c3b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c1b1c3b1c2a5';
   if(cv)(function(){
     var hd=SPR.split(';'), gw=+hd[0].split(',')[0], gh=+hd[0].split(',')[1], cells=[], re=/([a-e])(\d+)/g, m, idx=0, k;
     while((m=re.exec(hd[1]))){for(k=0;k<+m[2];k++,idx++)if(m[1]!=='a')cells.push([idx%gw,(idx/gw)|0,m[1].charCodeAt(0)-98])}
     var COL=['#15133B','#2F3CFF','#FFC52E','#FFFFFF'], N=cells.length;
-    var X=new Float32Array(N),Y=new Float32Array(N),VX=new Float32Array(N),VY=new Float32Array(N),TX=new Float32Array(N),TY=new Float32Array(N),DL=new Float32Array(N),C=new Uint8Array(N);
+    var X=new Float32Array(N),Y=new Float32Array(N),VX=new Float32Array(N),VY=new Float32Array(N),TX=new Float32Array(N),TY=new Float32Array(N),DL=new Float32Array(N),C=new Uint8Array(N),BR=new Uint8Array(N);
     var ctx=cv.getContext('2d'),W,H,cell,dpr,px=-999,py=-999,vis=false,run=false,t0=0,scan=-1,nextScan=0,real=d.querySelector('.real'),rx=0,ry=0,rr=0;
     function draw(){
       var s=cell*dpr*.94,i,c; ctx.clearRect(0,0,cv.width,cv.height);
-      for(c=0;c<4;c++){ctx.fillStyle=COL[c];ctx.beginPath();for(i=0;i<N;i++)if(C[i]===c)ctx.rect(X[i]*dpr,Y[i]*dpr,s,s);ctx.fill()}
+      for(c=0;c<4;c++){ctx.fillStyle=COL[c];ctx.beginPath();for(i=0;i<N;i++)if(C[i]===c&&!BR[i])ctx.rect(X[i]*dpr,Y[i]*dpr,s,s);ctx.fill()}
     }
     function setup(scatter){
       W=cv.parentNode.clientWidth; cell=W/gw; H=cell*gh; dpr=Math.min(devicePixelRatio||1,2);
@@ -590,28 +608,50 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
       if(scan<0&&el>2000&&now>nextScan){scan=0;nextScan=now+7000}
       if(scan>=0){scan+=H/50;if(scan>H+cell*3)scan=-1}
       for(i=0;i<N;i++){
-        if(el<DL[i])continue;
+        if(el<DL[i]||BR[i])continue;
         VX[i]+=(TX[i]-X[i])*.05; VY[i]+=(TY[i]-Y[i])*.05;
         dx=X[i]-px; dy=Y[i]-py; d2=dx*dx+dy*dy;
-        if(d2<R2&&d2>.01){dd=Math.sqrt(d2);f=(1-dd/R)*2.2;VX[i]+=dx/dd*f;VY[i]+=dy/dd*f}
+        if(!window.__hammer&&d2<R2&&d2>.01){dd=Math.sqrt(d2);f=(1-dd/R)*2.2;VX[i]+=dx/dd*f;VY[i]+=dy/dd*f}
         if(scan>=0&&Math.abs(TY[i]-scan)<cell*2)VX[i]+=(Math.random()-.5)*5;
         VX[i]*=.85; VY[i]*=.85; X[i]+=VX[i]; Y[i]+=VY[i];
       }
       draw();
     }
     function reveal(){
-      var R=cell*9,act=px>-900;
+      var R=cell*9,act=px>-900&&!window.__hammer;
       if(act){rx=px;ry=py}
       rr+=((act?R:0)-rr)*.16;
       if(real){real.style.setProperty('--rr',rr.toFixed(1)+'px');real.style.setProperty('--rx',rx+'px');real.style.setProperty('--ry',ry+'px')}
     }
+    var HS=6,hc=d.createElement('canvas'),hx;
+    hc.width=gw*HS;hc.height=gh*HS;hx=hc.getContext('2d');hx.fillStyle='#000';
+    window.__pxCellPx=function(){return cell};
+    window.__pxBreak=function(vx,vy,nc){
+      var r=cv.getBoundingClientRect(),k=r.width/W,bx=(vx-r.left)/k,by=(vy-r.top)/k,R=cell*nc,out=[],i,dx,dy,dd,c;
+      for(i=0;i<N;i++){
+        if(BR[i])continue;
+        dx=X[i]+cell/2-bx;dy=Y[i]+cell/2-by;dd=Math.sqrt(dx*dx+dy*dy);
+        if(dd<R*(.65+Math.random()*.45)){
+          BR[i]=1;c=cells[i];
+          hx.fillRect(c[0]*HS-.5,c[1]*HS-.5,HS+1,HS+1);
+          out.push({x:r.left+X[i]*k,y:r.top+Y[i]*k,s:cell*k,c:COL[C[i]],dx:dx/(dd||1),dy:dy/(dd||1),f:Math.max(0,1-dd/R)});
+        }
+      }
+      if(out.length){draw();if(real)real.style.setProperty('--holes','url('+hc.toDataURL()+')')}
+      return out;
+    };
+    window.__pxReset=function(){
+      BR.fill(0);hx.clearRect(0,0,hc.width,hc.height);
+      if(real)real.style.setProperty('--holes','none');
+      setup(!reduce);
+    };
     function loop(now){if(!vis){run=false;return}step(now);reveal();requestAnimationFrame(loop)}
     function pos(e){var r=cv.getBoundingClientRect();px=e.clientX-r.left;py=e.clientY-r.top;if(reduce){rr=cell*9;reveal()}}
     if(reduce)cv.addEventListener('pointerleave',function(){rr=0;px=-999;reveal()});
     cv.addEventListener('pointermove',pos);
     cv.addEventListener('pointerleave',function(){px=py=-999});
     cv.addEventListener('pointerup',function(e){if(e.pointerType!=='mouse')px=py=-999});
-    cv.addEventListener('pointerdown',function(e){
+    cv.addEventListener('pointerdown',function(e){if(window.__hammer)return;
       pos(e);
       for(var i=0;i<N;i++){var dx=X[i]-px,dy=Y[i]-py,dd=Math.sqrt(dx*dx+dy*dy)||1,f=(Math.random()*.7+.3)*cell*3;VX[i]+=dx/dd*f;VY[i]+=dy/dd*f}
     });
@@ -760,10 +800,10 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
     /* Command palette: Ctrl/Cmd+K or / */
     var pal=$('pal'),inp=$('palIn'),ul=$('palList'),sel=0,cur=[],pf=null;
     var cmds=[
-      ['Go home','#hero'],['See projects','#projects'],['See skills','#skills'],['Open the pixel studio','#play'],['Go to contact','#contact'],
+      ['Go home','#hero'],['See projects','#projects'],['See skills','#skills'],['Go to contact','#contact'],
       ['Send a message',function(){togglePanel()}],['Copy email',function(){copyEmail()}],
       ['Toggle night mode',function(){d.documentElement.classList.toggle('night')}],
-      ['Rain pixels',rain]
+      ['Rain pixels',rain],['Pick up the hammer',function(){if(window.__hammerToggle)window.__hammerToggle()}]
     ];
     function render(){
       var q=inp.value.toLowerCase();
@@ -802,38 +842,194 @@ html.night img,html.night video,html.night canvas,html.night iframe,html.night .
       kb.onclick=openP;hc.appendChild(kb);
     }
 
-    /* Pixel studio */
-    var pc=$('paint');
-    if(pc){
-      var G=32,x=pc.getContext('2d'),col=PAL.i,dn=false,mir=false,last;
-      var cell=function(e){
-        var r=pc.getBoundingClientRect();
-        return [Math.max(0,Math.min(G-1,Math.floor((e.clientX-r.left)/r.width*G))),Math.max(0,Math.min(G-1,Math.floor((e.clientY-r.top)/r.height*G)))];
-      };
-      var put=function(a,b){
-        (mir?[a,G-1-a]:[a]).forEach(function(u){
-          if(col==='e')x.clearRect(u,b,1,1);else{x.fillStyle=col;x.fillRect(u,b,1,1)}
-        });
-      };
-      var line=function(p,q){
-        var m=Math.max(Math.abs(q[0]-p[0]),Math.abs(q[1]-p[1]),1),i;
-        for(i=0;i<=m;i++)put(Math.round(p[0]+(q[0]-p[0])*i/m),Math.round(p[1]+(q[1]-p[1])*i/m));
-      };
-      SP.bug.forEach(function(r,y){for(var i=0;i<r.length;i++)if(PAL[r[i]]){x.fillStyle=PAL[r[i]];x.fillRect(6+i*2,6+y*2,2,2)}});
-      pc.addEventListener('pointerdown',function(e){dn=true;pc.setPointerCapture(e.pointerId);last=cell(e);line(last,last)});
-      pc.addEventListener('pointermove',function(e){if(!dn)return;var c=cell(e);line(last,c);last=c});
-      ['pointerup','pointercancel'].forEach(function(t){pc.addEventListener(t,function(){dn=false})});
-      d.querySelectorAll('.sw').forEach(function(b){
-        b.onclick=function(){col=b.dataset.c;d.querySelectorAll('.sw').forEach(function(o){o.classList.toggle('on',o===b)})};
+  })();
+
+  /* FP-TUNE: add ?align to the page URL to line the photo up by eye */
+  (function(){
+    if(!/[?&]align/.test(location.search))return;
+    var rl=d.querySelector('.real'),pw=d.querySelector('.pwrap');
+    if(!rl||!pw)return;
+    var cs=getComputedStyle(rl),
+        S=[['--fs','Zoom',0.5,4,0.01,''],['--fdy','Move up / down',-80,40,0.5,'%'],['--fx','Zoom point, left / right',0,100,1,'%'],['--fy','Zoom point, up / down',0,100,1,'%']],
+        box=d.createElement('div');
+    box.className='tune';
+    box.innerHTML='<label class="tr"><input type="checkbox" id="tDbg"> Show full photo behind pixels</label>'+S.map(function(a,i){
+      return '<label>'+a[1]+' <output id="to'+i+'"></output><input type="range" id="tr'+i+'" min="'+a[2]+'" max="'+a[3]+'" step="'+a[4]+'"></label>';
+    }).join('')+'<button type="button" id="tCopy">Copy CSS</button><pre id="tOut"></pre>';
+    d.body.appendChild(box);
+    var v=S.map(function(a){return parseFloat(cs.getPropertyValue(a[0]))});
+    function show(){
+      S.forEach(function(a,i){
+        $('to'+i).textContent=v[i]+a[5];$('tr'+i).value=v[i];
+        rl.style.setProperty(a[0],v[i]+a[5]);
       });
-      $('pMir').onclick=function(){mir=!mir;this.setAttribute('aria-pressed',String(mir))};
-      $('pClr').onclick=function(){x.clearRect(0,0,G,G)};
-      $('pSave').onclick=function(){
-        var t=d.createElement('canvas'),y=t.getContext('2d'),a=d.createElement('a');
-        t.width=t.height=512;y.imageSmoothingEnabled=false;y.fillStyle='#EEF0FA';y.fillRect(0,0,512,512);y.drawImage(pc,0,0,512,512);
-        a.download='my-pixel-mark.png';a.href=t.toDataURL('image/png');a.click();
-      };
+      $('tOut').textContent='.real{overflow:hidden;--fx:'+v[2]+'%;--fy:'+v[3]+'%;--fs:'+v[0]+';--fdy:'+v[1]+'%}';
     }
+    S.forEach(function(a,i){$('tr'+i).addEventListener('input',function(){v[i]=parseFloat(this.value);show()})});
+    $('tDbg').addEventListener('change',function(){rl.classList.toggle('dbg',this.checked);pw.classList.toggle('dbg',this.checked)});
+    $('tCopy').onclick=function(){if(navigator.clipboard)navigator.clipboard.writeText($('tOut').textContent)};
+    show();
+  })();
+
+  /* FP-HAMMER: pick up the hammer and smash the pixel portrait */
+  (function(){
+    var fig=d.querySelector('.portrait'),pw=d.querySelector('.pwrap'),pl=d.querySelector('.plinth');
+    if(!fig||!pw||!pl)return;
+    var PAL={i:'#15133B',c:'#2F3CFF',s:'#FFC52E',w:'#FFFFFF'},
+        HAM=['.iiiiiiiiii.','icwcccccccci','icccccccccci','icccccccccci','.iiiiiiiiii.','....issi....','....issi....','....issi....','....issi....','....issi....','....issi....','....issi....','....issi....','....iiii....','....issi....','....iiii....'];
+    function png(rows,k){
+      var c=d.createElement('canvas'),g;c.width=rows[0].length*k;c.height=rows.length*k;g=c.getContext('2d');
+      rows.forEach(function(r,y){for(var i=0;i<r.length;i++)if(PAL[r[i]]){g.fillStyle=PAL[r[i]];g.fillRect(i*k,y*k,k,k)}});
+      return c.toDataURL('image/png');
+    }
+    var A0=-20,A1=-75,HR=63.5,PVX=-HR*Math.sin(A1*Math.PI/180),PVY=HR*Math.cos(A1*Math.PI/180),RR=32;
+    var hm={on:false,x:-999,y:-999,a:A0,t:-1,hit:false},DP=[],dl=0,dprr=1,running=false;
+    var hammer=d.createElement('div'),ring=d.createElement('i'),dc=d.createElement('canvas'),dctx=dc.getContext('2d');
+    hammer.className='hammer';hammer.hidden=true;hammer.innerHTML='<img alt="" src="'+png(HAM,5)+'">';
+    ring.className='hring';ring.hidden=true;dc.className='deb';
+    d.body.appendChild(dc);d.body.appendChild(hammer);d.body.appendChild(ring);
+
+    var row=d.createElement('div'),bt=d.createElement('button'),re=d.createElement('button');
+    row.className='hrow';
+    bt.type='button';bt.className='hbtn';bt.setAttribute('aria-pressed','false');
+    bt.innerHTML='<img alt="" src="'+png(HAM,2)+'"><span>Pick up hammer</span>';
+    re.type='button';re.className='hbtn';re.hidden=true;re.textContent='Rebuild';
+    row.appendChild(bt);row.appendChild(re);fig.appendChild(row);
+
+    function place(){
+      hammer.style.transform='translate3d('+(hm.x+PVX-30)+'px,'+(hm.y+PVY-76)+'px,0) rotate('+hm.a+'deg)';
+      ring.style.transform='translate('+(hm.x-RR)+'px,'+(hm.y-RR)+'px)';
+    }
+    function setOn(v){
+      hm.on=v;window.__hammer=v;d.documentElement.classList.toggle('hm',v);
+      bt.setAttribute('aria-pressed',String(v));bt.lastChild.textContent=v?'Put it down':'Pick up hammer';
+      hammer.hidden=ring.hidden=!v;
+      if(!v)return;
+      var r=pw.getBoundingClientRect();
+      if(r.top<0||r.bottom>innerHeight){pw.scrollIntoView({block:'center',behavior:'instant'});r=pw.getBoundingClientRect()}
+      RR=(window.__pxCellPx?window.__pxCellPx():4)*8;
+      ring.style.width=ring.style.height=RR*2+'px';
+      if(hm.x<0||hm.y<r.top-200||hm.y>r.bottom+200){hm.x=r.left+r.width*.5;hm.y=r.top+r.height*.22}
+      place();
+    }
+    window.__hammerToggle=function(){setOn(!hm.on)};
+    bt.onclick=function(){setOn(!hm.on)};
+    re.onclick=function(){if(window.__pxReset)window.__pxReset();re.hidden=true};
+    addEventListener('keydown',function(e){if(e.key==='Escape'&&hm.on&&$('pal').hidden)setOn(false)});
+
+    /* debris: broken pixels fall, bounce on the yellow plinth, then fade */
+    function sz(){dprr=Math.min(devicePixelRatio||1,2);dc.width=innerWidth*dprr;dc.height=innerHeight*dprr}
+    sz();addEventListener('resize',sz);
+    function spawn(list){
+      list.forEach(function(o){
+        var sp=1.5+o.f*8;
+        DP.push({x:o.x,y:o.y,s:o.s,c:o.c,vx:o.dx*sp+(Math.random()-.5)*2,vy:o.dy*sp-1-Math.random()*5*o.f,rest:0,a:1,b:0});
+      });
+      if(!running){running=true;dl=performance.now();requestAnimationFrame(df)}
+    }
+    function df(now){
+      var dt=Math.min((now-dl)/16.67,3),pr=pl.getBoundingClientRect(),i,q;
+      dl=now;dctx.clearRect(0,0,dc.width,dc.height);
+      for(i=DP.length-1;i>=0;i--){
+        q=DP[i];
+        if(q.rest>0){q.rest-=dt;q.a=Math.max(0,q.rest/40);if(q.rest<=0){DP.splice(i,1);continue}}
+        else{
+          q.vy+=.6*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;
+          if(q.vy>0&&q.x+q.s>pr.left&&q.x<pr.right&&q.y+q.s>=pr.top&&q.y+q.s<=pr.top+q.vy*dt+6){
+            q.y=pr.top-q.s;
+            if(q.vy<2.5||q.b>1){q.rest=80+Math.random()*60;q.vx=q.vy=0}else{q.vy*=-.45;q.vx*=.7;q.b++}
+          }
+          if(q.y>innerHeight+30){DP.splice(i,1);continue}
+        }
+        dctx.globalAlpha=q.a;dctx.fillStyle=q.c;dctx.fillRect(q.x*dprr,q.y*dprr,q.s*dprr*1.3,q.s*dprr*1.3);
+      }
+      dctx.globalAlpha=1;
+      if(DP.length)requestAnimationFrame(df);else running=false;
+    }
+
+    /* the swing: raise, strike, recover */
+    function shock(x,y){
+      var e=d.createElement('i');e.className='shock';e.style.left=x+'px';e.style.top=y+'px';
+      d.body.appendChild(e);setTimeout(function(){e.remove()},450);
+    }
+    function smash(){
+      var list=window.__pxBreak?window.__pxBreak(hm.x,hm.y,8):[];
+      shock(hm.x,hm.y);
+      pw.classList.remove('thud');void pw.offsetWidth;pw.classList.add('thud');
+      if(list.length){spawn(list);re.hidden=false}
+    }
+    function sw(now){
+      var e=now-hm.t,u;
+      if(e<80){u=e/80;hm.a=A0+(A1-A0)*u*u}
+      else{
+        if(!hm.hit){hm.hit=true;smash()}
+        if(e<300){u=(e-80)/220;hm.a=A1+(A0-A1)*(1-Math.pow(1-u,3))}
+        else{hm.a=A0;hm.t=-1}
+      }
+      place();
+      if(hm.t>=0)requestAnimationFrame(sw);
+    }
+    pw.addEventListener('pointerdown',function(e){
+      if(!hm.on||hm.t>=0)return;
+      e.preventDefault();hm.x=e.clientX;hm.y=e.clientY;hm.hit=false;hm.t=performance.now();
+      requestAnimationFrame(sw);
+    },true);
+    addEventListener('pointermove',function(e){
+      if(!hm.on)return;
+      hm.x=e.clientX;hm.y=e.clientY;if(hm.t<0)place();
+    },{passive:true});
+  })();
+
+  /* FP-GRAFFITI: the role text as spray-paint graffiti behind the hero */
+  (function(){
+    var w=d.querySelector('.wall');if(!w)return;
+    var parts=(w.getAttribute('data-role')||'').split(/\s*[|\u2022\u00b7\/,]\s*/).map(function(t){return t.trim()}).filter(Boolean).slice(0,3);
+    if(!parts.length)return;
+    function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+    function blob(r,rx,ry){
+      var n=14,p=[],i,a,k,q,z,s;
+      for(i=0;i<n;i++){a=i/n*6.2832;k=.8+r()*.4;p.push([Math.cos(a)*rx*k,Math.sin(a)*ry*k])}
+      s='M'+((p[0][0]+p[n-1][0])/2).toFixed(0)+' '+((p[0][1]+p[n-1][1])/2).toFixed(0);
+      for(i=0;i<n;i++){q=p[i];z=p[(i+1)%n];s+='Q'+q[0].toFixed(0)+' '+q[1].toFixed(0)+' '+((q[0]+z[0])/2).toFixed(0)+' '+((q[1]+z[1])/2).toFixed(0)}
+      return s+'Z';
+    }
+    var DEF='<defs><filter id="fpSpray" x="-15%" y="-40%" width="130%" height="180%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4" result="wp"/><feDisplacementMap in="SourceGraphic" in2="wp" scale="9" xChannelSelector="R" yChannelSelector="G" result="core"/><feGaussianBlur in="core" stdDeviation="7" result="halo"/><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="1" seed="2" result="gr"/><feColorMatrix in="gr" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  14 0 0 0 -7.4" result="gm"/><feComposite in="halo" in2="gm" operator="in" result="dots"/><feMerge><feMergeNode in="dots"/><feMergeNode in="core"/></feMerge></filter><filter id="fpRough" x="-10%" y="-30%" width="120%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".03" numOctaves="2" seed="9" result="wp"/><feDisplacementMap in="SourceGraphic" in2="wp" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter></defs>';
+    var lw=0;
+    function build(still){
+      var W=w.clientWidth,H=w.clientHeight,P=20,u=W<900?W/420:W/1600,r=rng(7),svg='';
+      var L=W<900?[[210,95,360,-8],[215,190,300,-6],[210,285,340,-10]]:[[480,230,800,-9],[980,275,520,-8],[1330,335,560,-17]];
+      var C=[['#2F3CFF','#2F3CFF'],['#15133B','#FFC52E'],['#1A1660','#2F3CFF']];
+      parts.forEach(function(t,i){
+        var c=L[i],wd=c[2]*u,sz=Math.min(wd/(Math.max(t.length,4)*.5),H*.3),tc=C[i][0],ac=C[i][1],g='',k,x,y,len;
+        var s=sz/160,x1=-wd*.42,y1=sz*.62,x2=wd*.42,y2=sz*.26,my=sz*.78,an=Math.atan2(y2-my,x2),hl=sz*.26;
+        if(i===1)g+='<path d="'+blob(r,wd*.62,sz*.85)+'" fill="#FFC52E" filter="url(#fpRough)"/>';
+        for(k=0;k<30;k++){
+          x=(r()-.5)*wd*1.4;y=(r()-.5)*sz*2.1;
+          g+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(1+r()*r()*8).toFixed(1)+'" fill="'+(r()<.7?ac:tc)+'" opacity="'+(.4+r()*.5).toFixed(2)+'"/>';
+        }
+        g+='<text x="0" y="0" text-anchor="middle" dominant-baseline="central" textLength="'+wd.toFixed(0)+'" lengthAdjust="spacingAndGlyphs" font-family="Kaushan Script,cursive" font-size="'+sz.toFixed(0)+'" fill="'+tc+'" stroke="'+tc+'" stroke-width="'+(sz*.03).toFixed(1)+'" stroke-linejoin="round" filter="url(#fpSpray)">'+esc(t)+'</text>';
+        g+='<path transform="translate('+(-wd*.4).toFixed(0)+' '+(-sz*.62).toFixed(0)+') scale('+s.toFixed(2)+')" d="M0 0L8-24 22-6 34-30 46-6 60-24 68 0Z" fill="none" stroke="'+(i===0?ac:tc)+'" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>';
+        g+='<path d="M'+x1.toFixed(0)+' '+y1.toFixed(0)+'Q0 '+my.toFixed(0)+' '+x2.toFixed(0)+' '+y2.toFixed(0)+
+           'M'+(x2+hl*Math.cos(an+2.65)).toFixed(0)+' '+(y2+hl*Math.sin(an+2.65)).toFixed(0)+'L'+x2.toFixed(0)+' '+y2.toFixed(0)+'L'+(x2+hl*Math.cos(an-2.65)).toFixed(0)+' '+(y2+hl*Math.sin(an-2.65)).toFixed(0)+
+           '" fill="none" stroke="'+ac+'" stroke-width="'+(sz*.06).toFixed(1)+'" stroke-linecap="round" stroke-linejoin="round" filter="url(#fpRough)"/>';
+        for(k=0;k<4;k++){
+          x=(-.38+k*.26+r()*.08)*wd;y=sz*.18+r()*sz*.2;len=sz*.25+r()*sz*.55;
+          g+='<g class="dr" style="animation-delay:'+(1.2+k*.18+i*.2).toFixed(2)+'s"><rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+(sz*.035).toFixed(1)+'" height="'+len.toFixed(0)+'" rx="3" fill="'+(k%2?tc:ac)+'"/><circle cx="'+(x+sz*.0175).toFixed(1)+'" cy="'+(y+len+sz*.02).toFixed(0)+'" r="'+(sz*.03).toFixed(1)+'" fill="'+(k%2?tc:ac)+'"/></g>';
+        }
+        svg+='<g class="wg" style="animation-delay:'+(i*.25).toFixed(2)+'s"><g transform="translate('+(c[0]*u+P).toFixed(0)+' '+(c[1]*u+P).toFixed(0)+') rotate('+c[3]+')">'+g+'</g></g>';
+      });
+      w.classList.toggle('still',!!still);
+      w.innerHTML='<svg viewBox="0 0 '+(W+40)+' '+(H+40)+'" preserveAspectRatio="none" aria-hidden="true">'+DEF+svg+'</svg>';
+    }
+    function go(){lw=w.clientWidth;build(false)}
+    var ft=d.fonts&&d.fonts.load?d.fonts.load('180px "Kaushan Script"',parts.join('')):Promise.resolve();
+    Promise.race([ft,new Promise(function(a){setTimeout(a,1800)})]).then(go,go);
+    var rt;
+    addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){if(lw&&w.clientWidth!==lw){lw=w.clientWidth;build(true)}},250)});
+    if(!reduce)addEventListener('pointermove',function(e){
+      w.style.setProperty('--wx',((e.clientX/innerWidth-.5)*2).toFixed(2));
+      w.style.setProperty('--wy',((e.clientY/innerHeight-.5)*2).toFixed(2));
+    },{passive:true});
   })();
 
   /* Init */
