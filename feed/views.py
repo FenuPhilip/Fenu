@@ -96,3 +96,18 @@ def download_vcard(request):
     response = HttpResponse(content, content_type="text/vcard; charset=utf-8")
     response["Content-Disposition"] = f'attachment; filename="{profile.name.replace(" ", "_")}.vcf"'
     return response
+
+
+def sitemap(request):
+    from django.conf import settings
+    sitemap_path = settings.BASE_DIR / "sitemap.xml"
+    if sitemap_path.exists():
+        content = sitemap_path.read_text(encoding="utf-8")
+    else:
+        content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://fenu.onrender.com/</loc>
+  </url>
+</urlset>"""
+    return HttpResponse(content, content_type="application/xml")
